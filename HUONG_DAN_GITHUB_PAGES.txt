@@ -1,0 +1,18 @@
+DUA BAO CAO LEN GITHUB PAGES + DANG NHAP GOOGLE (FIREBASE fpt-tin0301)
+
+A. DUA LEN GITHUB
+1. Vao https://github.com/new  -> Repository name: bao-cao-tin0301 -> chon Public -> Create repository.
+2. Bam "uploading an existing file" -> keo 3 file: index.html, .nojekyll, README.md -> Commit changes.
+   (Neu khong thay file .nojekyll vi bi an, bo qua cung duoc.)
+3. Vao Settings -> Pages -> Source: "Deploy from a branch" -> Branch: main, thu muc / (root) -> Save.
+4. Doi 1-2 phut, link se la:  https://TEN-TAI-KHOAN.github.io/bao-cao-tin0301/
+
+B. CHO PHEP DANG NHAP GOOGLE TU TEN MIEN GITHUB
+1. Vao https://console.firebase.google.com/project/fpt-tin0301/authentication/settings
+2. Muc "Authorized domains" -> Add domain -> nhap:  TEN-TAI-KHOAN.github.io   (khong co https://, khong co /bao-cao-tin0301)
+3. Vao Authentication -> Sign-in method -> bat "Google" (va "Email/Password" neu muon) -> Save.
+4. Vao Authentication -> Users -> Add user de tao tai khoan email/mat khau cho tung nguoi.
+
+C. CAP NHAT BAO CAO SAU NAY
+Mo repo tren GitHub -> bam vao index.html -> bieu tuong but chi khong dung duoc vi file lon,
+nen: Add file -> Upload files -> keo index.html moi vao (ghi de) -> Commit changes. Link giu nguyen.
