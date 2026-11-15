@@ -479,6 +479,14 @@ td.dn{cursor:pointer;text-decoration:underline dotted;text-underline-offset:3px}
 html:not(.sb-mini) .ntab.gc{display:none}
 html.sb-mini .ngrp.gtog::after{display:none}
 
+.admin-only{display:none!important}html.is-admin .admin-only{display:inline-block!important}
+.adm-box{border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:12px;background:color-mix(in srgb,var(--accent,#f26f21) 7%,transparent);font-size:13px}.adm-box b{display:block;margin-bottom:4px}.adm-box ul{margin:4px 0 0;padding-left:18px;color:var(--muted)}
+.acl-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px}.acl-tab{font:inherit;font-size:13.5px;font-weight:600;padding:7px 14px;border-radius:99px;border:1px solid var(--line);background:var(--panel,#fff);color:var(--ink);cursor:pointer}.acl-tab.on{background:var(--ink);color:var(--panel,#fff);border-color:transparent}
+.acl-body h4{margin:16px 0 8px}.acl-t{width:100%;border-collapse:collapse;font-size:13px}.acl-t th,.acl-t td{padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:middle}.acl-t select,.acl-t input,.acl-add input,.acl-add select,.acl-form input,.acl-card input{font:inherit;font-size:13px;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--panel,#fff);color:var(--ink)}
+.acl-add{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:12px 0}.acl-note{font-size:12.5px;color:var(--muted);margin-top:10px}
+.acl-form{display:flex;flex-wrap:wrap;gap:12px 22px;align-items:flex-end;margin-bottom:8px}.acl-form label{display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:var(--muted)}.acl-form label.acl-ck{flex-direction:row;align-items:center;gap:6px;color:var(--ink);font-size:13.5px}
+.acl-card{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:10px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;background:var(--panel,#fff)}.acl-card b{flex:1 0 100%}.acl-ol{margin:4px 0 0;padding-left:20px;font-size:13.5px;line-height:1.55}
+.rq-b{margin-left:6px;font-style:normal;font-size:11px;font-weight:700;background:#c62f3b;color:#fff;border-radius:99px;padding:0 7px}
 .dm-bar{position:sticky;top:0;z-index:5;background:var(--paper);padding:8px 0 10px;display:flex;flex-direction:column;gap:10px}
 .dm-top{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
 .dm-s{flex:1;min-width:240px;max-width:460px;font:inherit;font-size:14px;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--panel,#fff);color:var(--ink)}
@@ -611,8 +619,8 @@ html.sb-mini .ngrp.gtog::after{display:none}
     <div class="actions">
       <button class="btn primary" id="btnPick">Chọn file Excel</button>
       <button class="btn" id="btnLocalSave" title="Lưu dữ liệu đã nạp vào trình duyệt của máy này (không chia sẻ cho người khác)">Lưu trên máy này</button>
-      <button class="btn ghost" id="btnExport" title="Tải file dữ liệu .json để mang sang máy khác">Xuất dữ liệu</button>
-      <button class="btn ghost" id="btnImport" title="Nạp lại file dữ liệu .json đã xuất">Nạp dữ liệu .json</button>
+      <button class="btn ghost admin-only" id="btnExport" title="Tải file dữ liệu .json để mang sang máy khác">Xuất dữ liệu</button>
+      <button class="btn ghost admin-only" id="btnImport" title="Nạp lại file dữ liệu .json đã xuất">Nạp dữ liệu .json</button>
       <input type="file" id="fileIn" accept=".xlsx,.xls,.xlsm,.csv" multiple hidden>
       <input type="file" id="jsonIn" accept=".json,application/json" hidden>
     </div>
@@ -660,6 +668,7 @@ html.sb-mini .ngrp.gtog::after{display:none}
         <h2><span data-i18n="staffT">Năng suất theo nhân sự</span><span class="hint">bấm vào dòng để xem chi tiết ca</span></h2>
         <div class="actions">
           <div class="legend"><span style="--c:var(--tk)">Triển khai</span><span style="--c:var(--bt)">Bảo trì</span><span style="--c:var(--red)">Mục tiêu</span></div>
+          <button class="btn" id="btnCsv" type="button" title="Xuất bảng đang hiển thị ra CSV">Xuất CSV</button>
           <select class="tsearch stf" id="stBlock" aria-label="Lọc block" style="width:auto"></select>
           <select class="tsearch stf" id="stShift" aria-label="Lọc ca trực" style="width:auto"></select>
           <input type="search" class="tsearch" id="search" placeholder="Tìm tên / tài khoản…">
@@ -697,6 +706,7 @@ html.sb-mini .ngrp.gtog::after{display:none}
 </section>
 
 <section id="pageL" hidden><div class="lkp" id="lkBody"></div></section>
+<section id="pageA" hidden></section>
 
 <section id="pageS" hidden>
   <div class="teams" id="teams"></div>
@@ -950,7 +960,7 @@ const short = b => String(b||'').replace(/^Phuong\s+/,'');
 const I18N={
  vi:{brandSub:'Báo cáo kỹ thuật',settings:'Cài đặt',contact:'Liên hệ',contactInfo:'Thông tin liên hệ',resetDefault:'Khôi phục mặc định',done:'Xong',dark:'Giao diện tối',light:'Giao diện sáng',collapse:'Thu gọn thanh bên',expand:'Mở rộng thanh bên',
    appTitle:'Báo cáo năng suất & tồn triển khai bảo trì',staffPageTitle:'Chi tiết danh sách nhân sự',staffT:'Năng suất theo nhân sự',hourT:'Ca hoàn tất theo giờ',nsT:'Năng suất bình quân theo block',tonT:'Ca tồn theo block',histT:'Lịch sử các lần nạp',asgT:'Phân việc gợi ý xử lý tồn',aiT:'AI phân tích & đánh giá',
-   r1:'Năng suất & tồn',r2:'BC Tồn TKBT',r3:'BC CSAT DV lần 2',r4:'BC Phân tích 7N TKBT',r5:'BC Đánh giá Hi FPT',r6:'Danh sách nhân sự',gKpi:'KPI',gCtl:'Kiểm soát',k1:'Nạp dữ liệu',k2:'Tổng quan',k3:'BC KPI',k4:'Xu hướng',k5:'Phiếu cần xử lý',k6:'Sức khoẻ',k7:'Bán hàng & NSLĐ',k8:'Quy tắc & cấu hình',gTool:'Công cụ & hỗ trợ',x1:'Chatbot FTC',x2:'Chatbot Chang',x3:'Tài Liệu Kỹ Thuật',x4:'Đầu Mối Hỗ Trợ',x5:'Đầu Mối, Phòng Ban KV Hà Nội',sBg:'Màu nền',sBgNote:'Chỉ áp dụng ở giao diện sáng.',
+   r1:'Năng suất & tồn',r2:'BC Tồn TKBT',r3:'BC CSAT DV lần 2',r4:'BC Phân tích 7N TKBT',r5:'BC Đánh giá Hi FPT',r6:'Danh sách nhân sự',gKpi:'KPI',gCtl:'Kiểm soát',k1:'Nạp dữ liệu',k2:'Tổng quan',k3:'BC KPI',k4:'Xu hướng',k5:'Phiếu cần xử lý',k6:'Sức khoẻ',k7:'Bán hàng & NSLĐ',k8:'Quy tắc & cấu hình',gTool:'Công cụ & hỗ trợ',x1:'Chatbot FTC',x2:'Chatbot Chang',x3:'Tài Liệu Kỹ Thuật',x4:'Đầu Mối Hỗ Trợ',x5:'Đầu Mối, Phòng Ban KV Hà Nội',gAdm:'Quản trị',a1:'Quản trị',a2:'Đề xuất của tôi',sBg:'Màu nền',sBgNote:'Chỉ áp dụng ở giao diện sáng.',
    sLang:'Ngôn ngữ',sTheme:'Giao diện',sAccent:'Màu nhấn',sFont:'Phông chữ',sSize:'Cỡ chữ',sDens:'Độ cao dòng bảng',sSb:'Thanh bên',
    tLight:'Sáng',tDark:'Tối',tSys:'Theo máy',dC:'Gọn',dM:'Vừa',dL:'Rộng',sbFull:'Mở rộng',sbMini:'Thu gọn',fSys:'Hệ thống',
    langNote:'Ngôn ngữ áp dụng cho thanh bên, cài đặt và tiêu đề chính; số liệu báo cáo vẫn hiển thị tiếng Việt.',
@@ -958,7 +968,7 @@ const I18N={
    edit:'Sửa',save:'Lưu',cancel:'Huỷ',cName:'Họ tên',cRole:'Chức vụ',cUnit:'Đơn vị',cPhone:'Điện thoại',cEmail:'Email',cZalo:'Zalo',cNote:'Ghi chú',ctHint:'Thông tin hiện cho mọi người mở trang. Chỉ chủ trang chỉnh sửa được.'},
  en:{brandSub:'Technical reports',settings:'Settings',contact:'Contact',contactInfo:'Contact information',resetDefault:'Reset to default',done:'Done',dark:'Dark mode',light:'Light mode',collapse:'Collapse sidebar',expand:'Expand sidebar',
    appTitle:'Productivity & backlog report — installation and maintenance',staffPageTitle:'Staff list details',staffT:'Productivity by technician',hourT:'Completed jobs by hour',nsT:'Average productivity by block',tonT:'Backlog by block',histT:'Upload history',asgT:'Suggested backlog assignment',aiT:'AI analysis & assessment',
-   r1:'Productivity & backlog',r2:'Backlog report',r3:'CSAT 2nd survey',r4:'7-day repeat analysis',r5:'Hi FPT review',r6:'Staff list',gKpi:'KPI',gCtl:'Control',k1:'Load data',k2:'Overview',k3:'KPI report',k4:'Trends',k5:'Tickets to handle',k6:'Health',k7:'Sales & productivity',k8:'Rules & settings',gTool:'Tools & support',x1:'FTC chatbot',x2:'Chang chatbot',x3:'Technical Docs',x4:'Support Contacts',x5:'Hanoi Region Directory',sBg:'Background',sBgNote:'Light theme only.',
+   r1:'Productivity & backlog',r2:'Backlog report',r3:'CSAT 2nd survey',r4:'7-day repeat analysis',r5:'Hi FPT review',r6:'Staff list',gKpi:'KPI',gCtl:'Control',k1:'Load data',k2:'Overview',k3:'KPI report',k4:'Trends',k5:'Tickets to handle',k6:'Health',k7:'Sales & productivity',k8:'Rules & settings',gTool:'Tools & support',x1:'FTC chatbot',x2:'Chang chatbot',x3:'Technical Docs',x4:'Support Contacts',x5:'Hanoi Region Directory',gAdm:'Admin',a1:'Admin',a2:'My requests',sBg:'Background',sBgNote:'Light theme only.',
    sLang:'Language',sTheme:'Theme',sAccent:'Accent colour',sFont:'Font',sSize:'Text size',sDens:'Table row height',sSb:'Sidebar',
    tLight:'Light',tDark:'Dark',tSys:'System',dC:'Compact',dM:'Normal',dL:'Roomy',sbFull:'Expanded',sbMini:'Collapsed',fSys:'System',
    langNote:'Language applies to the sidebar, settings and main titles; report data stays in Vietnamese.',
@@ -1002,6 +1012,11 @@ addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('
 function renderSettings(){
   const b=$('#setBody'); if(!b) return; b.textContent='';
   const row=(label,ctl)=>b.append(el('div',{class:'srow'},el('label',null,label),ctl));
+  { const box=el('div',{class:'adm-box'});
+    if(IS_ADMIN){ box.append(el('b',null,'Quyền: '+ACL.label()), 'Quyền chủ sở hữu đang bật — xem mục Quản trị ở menu trái:');
+      const ul=el('ul'); ['Sửa danh sách nhân sự, đội trưởng, nhập hàng loạt, khôi phục danh sách mặc định','Xoá file dữ liệu đã nạp (Tồn giờ, Hoàn tất, Lịch trực)','Xuất / nạp file dữ liệu .json','Sửa thông tin liên hệ'].forEach(t=>ul.append(el('li',null,t))); box.append(ul); }
+    else { box.append(el('b',null,'Quyền: '+ACL.label()), 'Quyền của bạn do chủ sở hữu cấp. Các thao tác quản trị (người dùng, dữ liệu gốc, danh sách nhân sự, cấu hình) chỉ dành cho chủ sở hữu.'); }
+    b.append(box); }
   const opts=(key,list)=>{ const d=el('div',{class:'opt'}); list.forEach(([v,l])=>{ const x=el('button',{type:'button',class:PREF[key]===v?'on':''},l); x.onclick=()=>setPref(key,v); d.append(x); }); return d; };
   row(L('sLang'), el('div',null, opts('lang',[['vi','Tiếng Việt'],['en','English']]), el('div',{style:'font-size:12px;color:var(--muted);margin-top:6px'},L('langNote'))));
   row(L('sTheme'), opts('theme',[['light',L('tLight')],['dark',L('tDark')],['auto',L('tSys')]]));
@@ -1022,7 +1037,12 @@ $('#setReset').onclick=()=>{ PREF=Object.assign({},PREF_DEF); store.set('pref',P
 
 // ---------- liên hệ ----------
 const CONTACT_DEF={name:'Cao Văn Thắng',role:'Đội trưởng kỹ thuật',unit:'TIN-03.1 · FPT Telecom',phone:'',email:'',zalo:'',note:''};
-let CONTACT=Object.assign({},CONTACT_DEF,store.get('contact',{})), CT_EDIT=false, IS_OWNER=true;
+let CONTACT=Object.assign({},CONTACT_DEF,store.get('contact',{})), CT_EDIT=false, IS_OWNER=false;
+const OWNER_EMAIL='thangcv94@gmail.com';
+let IS_ADMIN=false, CAN_BASE=true, CAN_SHIFT=true;
+function setAdmin(v){ IS_ADMIN=!!v; IS_OWNER=IS_ADMIN; CAN_WRITE=CAN_BASE&&IS_ADMIN; CAN_SHIFT=CAN_BASE; document.documentElement.classList.toggle('is-admin',IS_ADMIN); try{ $('#target').disabled=!IS_ADMIN; }catch(e){} try{ if(typeof R!=='undefined' && R){ render(); } }catch(e){} try{ renderRoster && renderRoster(true); }catch(e){} try{ renderSettings(); }catch(e){} }
+const isOwnerMail = e => String(e||'').trim().toLowerCase()===OWNER_EMAIL;
+function needAdmin(msg){ if(IS_ADMIN) return true; toast(msg||'Chức năng này chỉ dành cho chủ sở hữu ('+OWNER_EMAIL+').', true); return false; }
 function renderContact(){
   const b=$('#ctBody'), f=$('#ctFoot'); b.textContent=''; f.textContent='';
   const keys=[['phone','cPhone'],['email','cEmail'],['zalo','cZalo'],['note','cNote']];
@@ -1087,7 +1107,7 @@ async function initLogin(){
   $('#logoutBtn').onclick = async ()=>{ try{ await auth.signOut(); }catch(e){} };
   auth.onAuthStateChanged(u=>{
     if(u && ALLOWED_EMAILS.length && !ALLOWED_EMAILS.includes(String(u.email||'').toLowerCase())){ err('Tài khoản '+(u.email||'')+' chưa được cấp quyền dùng trang này.'); auth.signOut(); return; }
-    FB_USER=u||null;
+    FB_USER=u||null; if(u) ACL.login(u.email,false); else setAdmin(false);
     ov.hidden=!!u; document.documentElement.classList.toggle('locked',!u);
     $('#logoutBtn').hidden=!u;
     if(u){ $('#lgPass').value=''; err(''); setAccountFromFirebase(u); if(R) render(); }
@@ -1097,16 +1117,16 @@ function setAccountFromFirebase(u){
   const nm=u.displayName || (u.email||'').split('@')[0] || 'Người dùng';
   const ini=nm.split(/\s+/).map(x=>x[0]).join('').slice(-2).toUpperCase();
   $('#acctAv').src = u.photoURL || ('data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="16" fill="#f26f21"/><text x="16" y="21" font-size="13" font-weight="700" text-anchor="middle" fill="#fff" font-family="sans-serif">'+ini.replace(/[<&>]/g,'')+'</text></svg>'));
-  $('#acctName').textContent = nm; $('#acctRole').textContent = u.email || 'Đã đăng nhập'; $('#acct').title = nm+(u.email?' · '+u.email:'');
+  $('#acctName').textContent = nm; $('#acctRole').textContent = ACL.label(); $('#acct').title = nm+(u.email?' · '+u.email:'');
 }
 async function initAccount(){
   const av=$('#acctAv'), nm=$('#acctName'), rl=$('#acctRole');
   let u=null; try{ u = await claude.use('user'); }catch(e){}
   if(!u && !IN_ARTIFACT){ return; }
   if(!u){ av.src='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><rect width="32" height="32" rx="16" fill="#2f3b49"/><text x="16" y="21" font-size="14" text-anchor="middle" fill="#c9d1da" font-family="sans-serif">⦾</text></svg>'); nm.textContent=L('guest'); rl.textContent=L('offline'); $('#acct').title=L('offline'); return; }
-  const me=await u.me(); IS_OWNER=!!me.isOwner;
+  const me=await u.me(); ACL.login(me.email||'',!!me.isOwner);
   av.src=me.avatarUrl; nm.textContent=me.name||L('you');
-  rl.textContent= me.isOwner?L('owner'):me.canEdit?L('editor'):L('viewer');
+  rl.textContent= ACL.label();
   $('#acct').title=(me.name||L('you'))+' · '+rl.textContent;
 }
 
@@ -1117,7 +1137,7 @@ let toastT; function toast(msg, err){ const t=$('#toast'); t.textContent=msg; t.
 
 // state
 let RAW = {}, META = {}, R = null, SORT = {k:'ht',dir:-1}, uploadedAt = null, DRAWER = null;
-let ROSTER = null, DRAFT = null, DIRTY = false, DB = null, CAN_WRITE = true;
+let ROSTER = null, DRAFT = null, DIRTY = false, DB = null, CAN_WRITE = false;
 let FILTER = store.get('filter', {leader:'THANGCV', blocks:null});
 let SHIFTS = store.get('shifts', {}); // {yyyy-mm-dd: {maNV: 'CA1'|'O'}}
 const leaders = () => (ROSTER && ROSTER.leaders) || [];
@@ -1125,7 +1145,7 @@ const leaderName = c => { const l = leaders().find(x=>x.code===c); return l ? l.
 function loadSample(){ RAW={}; META={}; for(const [t,v] of Object.entries(SAMPLE)){ RAW[t]=v.rows; META[t]={name:v.name, at:null, sample:true}; } uploadedAt=null; }
 $('#target').value = store.get('target', 6);
 $('#autoAI').checked = store.get('autoAI', true);
-$('#target').onchange = () => { store.set('target', +$('#target').value||6); recompute(); };
+$('#target').onchange = () => { if(!IS_ADMIN){ $('#target').value=store.get('target',6); toast('Chỉ chủ sở hữu mới đổi được mục tiêu.',true); return; } ACL.log('config','Mục tiêu = '+$('#target').value); store.set('target', +$('#target').value||6); recompute(); };
 $('#autoAI').onchange = () => store.set('autoAI', $('#autoAI').checked);
 
 const fixLdr = c => ['thangcv','huybb','tuannt2'].includes(String(c||'').toLowerCase()) ? String(c).toUpperCase() : c;
@@ -1134,6 +1154,7 @@ function recompute(){
   normRoster(ROSTER); normRoster(DRAFT); FILTER.leader=fixLdr(FILTER.leader);
   R = Engine.compute(RAW, {target: +$('#target').value || 6, roster: ROSTER ? ROSTER.staff : [], shiftOv: SHIFTS});
   if(FILTER.leader!=='all' && FILTER.leader!=='none' && ROSTER && !leaders().some(l=>l.code===FILTER.leader)) FILTER.leader='all';
+  ACL.enforce();
   render();
   try{ ['phan-tich-7n','hi-fpt'].forEach(k=>{ if(FRAMES[k]) postRoster(FRAMES[k]); }); }catch(e){}
 }
@@ -1166,7 +1187,7 @@ function renderIntake(){
       el('div',{class:'fn',title:m?m.name:''}, !has?'Chưa nạp file — bấm hoặc kéo thả vào trang': (m.sample?'Dữ liệu mẫu · ':'') + m.name + (m.at?' · '+dmyhm(m.at):''), st));
     if(has){ const x=el('button',{class:'del',title:'Xoá file '+NAMES[k]+' để nạp lại','aria-label':'Xoá file '+NAMES[k]},'×');
       x.onclick=ev=>{ ev.stopPropagation(); clearFile(k); }; s.append(x); }
-    s.onclick=()=>{ PICK_FOR=k; fin.click(); };
+    s.onclick=()=>{ if(!needAdmin('Chỉ chủ sở hữu mới được tải lên / thay thế dữ liệu gốc.')) return; PICK_FOR=k; fin.click(); };
   });
   $('#subTitle').textContent = 'Nhóm TIN0301 · ngày '+dmy(R.repDate)+' · '+leaders().length+' đội trưởng · '+(ROSTER?ROSTER.staff.length:0)+' nhân sự · phiếu HT mới nhất '+hhmm(R.totals.lastHt);
 }
@@ -1189,13 +1210,16 @@ $('#btnLocalSave').onclick=async()=>{
   catch(e){ toast('Không lưu được trên máy này ('+(e&&e.name||'lỗi')+'). Thử “Xuất dữ liệu”.', true); }
 };
 $('#btnExport').onclick=()=>{
+  if(!needAdmin()) return;
   const f=snapFiles(); if(!Object.keys(f).length){ toast('Chưa có file nào đã nạp để xuất.', true); return; }
   const blob=new Blob([JSON.stringify({app:'nsKTV',v:1,exportedAt:new Date().toISOString(),files:f})],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); const d=new Date(); a.download='ns-ktv-du-lieu-'+d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'.json'; document.body.append(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500);
-  toast('Đã xuất file dữ liệu — chép sang máy khác rồi bấm “Nạp dữ liệu .json”.');
+  ACL.log('export','Xuất file dữ liệu .json'); toast('Đã xuất file dữ liệu — chép sang máy khác rồi bấm “Nạp dữ liệu .json”.');
 };
 $('#btnImport').onclick=()=>$('#jsonIn').click();
 async function importJson(file){
+  if(!needAdmin()) return false;
+  await ACL.snap('Tự động trước khi nạp .json'); ACL.log('upload','Nạp file dữ liệu '+file.name);
   try{ const j=JSON.parse(await file.text()); if(!j || !j.files) throw 0; let n=0;
     ['ton','done','lich'].forEach(k=>{ if(j.files[k] && applySaved(k,j.files[k],false)){ META[k].local=true; n++; } });
     if(!n) throw 0; uploadedAt=new Date(); LOCAL_IDB={...LOCAL_IDB,...j.files}; try{ await idbSet('files',LOCAL_IDB); }catch(e){}
@@ -1216,6 +1240,8 @@ async function saveFile(k){
   }finally{ m.saving=false; renderIntake(); }
 }
 async function clearFile(k){
+  if(!needAdmin('Chỉ chủ sở hữu mới được xoá file dữ liệu đã nạp.')) return;
+  await ACL.snap('Tự động trước khi xóa '+NAMES[k]); ACL.log('delete','Xóa file '+NAMES[k]);
   const wasSample = META[k] && META[k].sample;
   delete RAW[k]; delete META[k]; recompute();
   if(wasSample){ toast('Đã xoá '+NAMES[k]+' (mẫu). Kéo thả hoặc bấm vào ô để nạp file mới.'); return; }
@@ -1242,6 +1268,8 @@ function initFiles(db){
 }
 
 async function handleFiles(list){
+  if(!needAdmin('Chỉ chủ sở hữu mới được tải lên / thay thế dữ liệu gốc.')) return;
+  await ACL.snap('Tự động trước khi tải lên');
   $('#err').textContent=''; const got=[]; const errs=[];
   list=[...list]; for(const f of list.filter(x=>/\.json$/i.test(x.name))) await importJson(f); list=list.filter(x=>!/\.json$/i.test(x.name));
   for(const f of list){
@@ -1261,6 +1289,7 @@ async function handleFiles(list){
   uploadedAt = new Date();
   recompute(); pushHistory(); renderHist();
   toast('Đã nạp: '+got.map(k=>NAMES[k]).join(' · ')+(Object.values(META).some(m=>m.sample)?' — các mục còn lại đang là dữ liệu mẫu':''));
+  ACL.log('upload','Nạp '+got.map(k=>NAMES[k]).join(', '));
   for(const k of [...new Set(got)]) await saveFile(k);
   if($('#autoAI').checked) runAI();
 }
@@ -1277,11 +1306,12 @@ $('#saveTeam').onclick=()=>{ store.set('filter',FILTER); toast('Đã lưu bộ l
 
 // ---------- sửa ca trực ----------
 async function setShift(id, code, orig){
+  if(ACL.shiftGate(id,code,orig)) return;
   const day=R.ymd, m=Object.assign({}, SHIFTS[day]||{});
   if(code===orig) delete m[id]; else m[id]=code;
   SHIFTS=Object.assign({}, SHIFTS, {[day]:m}); store.set('shifts',SHIFTS); recompute();
   const p=R.people.find(x=>x.key===id);
-  toast('Đã đổi ca '+(p?p.name:id)+' thành '+code+(code===orig?' (đúng như lịch trực)':''));
+  toast('Đã đổi ca '+(p?p.name:id)+' thành '+code+(code===orig?' (đúng như lịch trực)':'')); ACL.log('shift','Đổi ca '+(p?p.name:id)+' → '+code+' ngày '+R.ymd);
   if(DB){ try{ await DB.doc('shifts/'+day).set({map:m, at:new Date().toISOString()}); }catch(e){ toast('Chưa lưu được ca trực lên bản chung ('+(e&&e.code||'lỗi')+'), chỉ lưu trên máy này.', true); } }
 }
 function initShifts(db){
@@ -1313,7 +1343,7 @@ function view(){
     ton: sum(people,'ton'), tonTK: sum(people,'tonTK'), tonBT: sum(people,'tonBT'),
     tre: sum(people,'tre') + un.reduce((s,[,u])=>s+u.tre,0), unassigned: un.reduce((s,[,u])=>s+u.tk+u.bt,0),
     medHrs: med, in24: hrs.length ? hrs.filter(h=>h<=24).length/hrs.length : null,
-    zero: working.filter(p=>p.ht===0).length, met: working.filter(p=>p.ht>=R.target).length, below: working.filter(p=>p.ht>0 && p.pct<0.5).length };
+    zero: working.filter(p=>p.ht===0).length, met: working.filter(p=>p.ht>=R.target*TH().good).length, below: working.filter(p=>p.ht>0 && p.pct<TH().bad).length };
   const byHour = {}; items.forEach(d=>{ const h=d.ht.getHours(); const o=byHour[h]=byHour[h]||{h,TK:0,BT:0}; isTK(d.loai)?o.TK++:o.BT++; });
   const byTask = {}; items.forEach(d=>{ byTask[d.tv]=(byTask[d.tv]||0)+1; });
   const bm = {}; const B = b => bm[b] = bm[b] || {block:b, ktv:0, onShift:0, ht:0, ton:0, tre:0, unassigned:0};
@@ -1339,7 +1369,7 @@ function renderGrp(){
   const T=R.target||6, sum=(a,k)=>a.reduce((s,x)=>s+(x[k]||0),0);
   const unA=Object.values(R.unassigned||{}).reduce((s,u)=>s+u.tk+u.bt,0);
   const mk=(label,ps,un,key)=>{ const w=ps.filter(p=>p.inLich&&p.working); return {label,key,ps,ktv:ps.filter(p=>p.inLich).length,on:w.length,tk:sum(ps,'tonTK'),bt:sum(ps,'tonBT'),un,tre:sum(ps,'tre'),htTK:sum(ps,'htTK'),htBT:sum(ps,'htBT'),ht:sum(ps,'ht'),ns:w.length?sum(w,'ht')/w.length:0}; };
-  const G=[mk('TIN0301',R.people,unA,'all')].concat(leaders().map(l=>mk(l.code,R.people.filter(p=>p.leader===l.code),0,l.code)));
+  const G=[mk('TIN0301',R.people,unA,'all')].concat(leaders().map(l=>mk(l.code,R.people.filter(p=>p.leader===l.code),0,l.code))).filter(g=>ACL.allowLeader(g.key));
   const heads=[['Đội trưởng',1],['KTV đi ca'],['Tồn TK'],['Tồn BT'],['Chưa phân công'],['Tồn tổng'],['NS TK'],['NS BT'],['NS tổng'],['NS BQ / KTV'],['Đánh giá'],['% MT']];
   const hr=el('tr'); heads.forEach(([l,left])=>hr.append(el('th',{class:left?'l':''},l)));
   t.append(el('thead',null,hr)); const tb=el('tbody'); t.append(tb);
@@ -1350,7 +1380,7 @@ function renderGrp(){
       el('td',{class:'num tonc'},z(g.tk)), el('td',{class:'num tonc'},z(g.bt)), el('td',{class:'num tonc'},z(g.un)), el('td',{class:'num tonc tons'},z(g.tk+g.bt+g.un)),
       doneCell(el('td',{class:'num c-tk'},z(g.htTK)),'Đội '+g.label,g.ps,'TK'), doneCell(el('td',{class:'num c-bt'},z(g.htBT)),'Đội '+g.label,g.ps,'BT'), doneCell(el('td',{class:'num'},el('b',null,fmt(g.ht))),'Đội '+g.label,g.ps,'all'),
       el('td',{class:'num'},el('b',null,g.on?fmt(g.ns,1):'—')));
-    if(g.on){ const L=nsLevel(Math.round(g.ns)); tr.append(el('td',null,el('span',{class:'lv lv-'+L.k,title:fmt(g.ns,1)+' ca/KTV'},L.t)), el('td',{class:'num '+(g.ns>=T?'sev-green':g.ns<T*0.5?'sev-red':'sev-amber')},pct(g.ns/T))); }
+    if(g.on){ const L=nsLevel(Math.round(g.ns)); tr.append(el('td',null,el('span',{class:'lv lv-'+L.k,title:fmt(g.ns,1)+' ca/KTV'},L.t)), el('td',{class:'num '+(g.ns>=T*TH().good?'sev-green':g.ns<T*TH().bad?'sev-red':'sev-amber')},pct(g.ns/T))); }
     else tr.append(el('td',null,'—'), el('td',{class:'num'},'—'));
     tr.onclick=()=>{ FILTER={leader:g.key,blocks:null}; render(); }; tr.onkeydown=e=>{ if(e.key==='Enter') tr.onclick(); };
     tb.append(tr);
@@ -1360,7 +1390,7 @@ function renderTabs(){
   const nav=$('#tabs'); nav.textContent='';
   const opts=[['all','Tất cả']].concat(leaders().map(l=>[l.code,l.code]));
   if(R.people.some(p=>!p.leader && (p.inLich||p.ht||p.ton))) opts.push(['none','Chưa gán đội']);
-  opts.forEach(([c,l])=>{
+  ACL.filterTabs(opts).forEach(([c,l])=>{
     const ps = R.people.filter(p=> c==='all' ? true : c==='none' ? !p.leader : p.leader===c);
     const ht = ps.reduce((s,p)=>s+p.ht,0), tre = ps.reduce((s,p)=>s+p.tre,0) + (c==='all'?Object.values(R.unassigned).reduce((s,u)=>s+u.tre,0):0);
     const b=el('button',{class:'tab'+(FILTER.leader===c?' on':''),title:c==='all'?'Toàn đơn vị':leaderName(c)}, el('b',null,l), el('span',{class:'num'},fmt(ht)+' ca HT'), tre?el('em',{class:'bd'},tre+' trễ hẹn'):null);
@@ -1485,7 +1515,8 @@ function renderStaff(V){
   const shifts=[...new Set(base.map(p=>p.shift).filter(Boolean))].sort();
   STAFF_F.block=fillStaffSel('#stBlock','Tất cả block',blocks,STAFF_F.block,short);
   STAFF_F.shift=fillStaffSel('#stShift','Tất cả ca trực',shifts,STAFF_F.shift,v=>'Ca '+v);
-  let rows=base.filter(p=>(!q || Engine.norm(p.name+' '+p.acct).includes(q)) && (!STAFF_F.block || p.block===STAFF_F.block) && (!STAFF_F.shift || p.shift===STAFF_F.shift));
+  let rows=base.filter(p=>(!q || Engine.norm(p.name+' '+p.acct).includes(q)) && (!STAFF_F.block || p.block===STAFF_F.block) && (!STAFF_F.shift || p.shift===STAFF_F.shift) && ACL.rowOk(p));
+  window.LAST_ROWS=rows;
   rows.forEach(p=>{ p.lvn=p.ht; p.acctFull = p.acct ? (String(p.acct).includes('.') ? p.acct : 'TIN0301.'+p.acct) : ''; });
   rows.sort((a,b)=>{ let x=a[SORT.k], y=b[SORT.k]; if(x==null) x=-Infinity; if(y==null) y=-Infinity; if(x instanceof Date) x=+x; if(y instanceof Date) y=+y;
     const d = typeof x==='string' ? x.localeCompare(y,'vi') : x-y; return (d || a.name.localeCompare(b.name,'vi'))*SORT.dir; });
@@ -1494,7 +1525,7 @@ function renderStaff(V){
   t.append(el('thead',null,hr)); const tb=el('tbody'); t.append(tb);
   const z = n => n ? fmt(n) : el('span',{class:'zero'},'0');
   rows.forEach(p=>{
-    const low = p.working && p.ht < R.target*0.5, high = p.working && p.ht >= R.target;
+    const low = p.working && p.ht < R.target*TH().bad, high = p.working && p.ht >= R.target*TH().good;
     const tags=[]; if(p.working && p.ht===0) tags.push(el('span',{class:'tag red'},'Chưa có ca HT'));
     else if(low) tags.push(el('span',{class:'tag red'},'< 50% MT'));
     if(p.working===false && p.ton>0) tags.push(el('span',{class:'tag amber'},'Nghỉ còn tồn'));
@@ -1506,7 +1537,7 @@ function renderStaff(V){
       const sel=el('select',{class:'shiftsel '+(p.working?'on':'off')+(p.shiftEd?' ed':''),title:p.shiftEd?'Đã sửa tay (lịch trực ghi: '+(p.shift0||'trống')+')':'Bấm để sửa ca trực','aria-label':'Ca trực của '+p.name});
       const opts=['CA1','O']; if(p.shift && !opts.includes(p.shift)) opts.unshift(p.shift); if(p.shift0 && !opts.includes(p.shift0)) opts.push(p.shift0);
       opts.forEach(o=>sel.append(el('option',{value:o},o)));
-      sel.value=p.shift; sel.disabled=!CAN_WRITE && !!DB;
+      sel.value=p.shift; sel.disabled=!ACL.can('shift');
       sel.onclick=e=>e.stopPropagation(); sel.onmousedown=e=>e.stopPropagation(); sel.onkeydown=e=>e.stopPropagation();
       sel.onchange=()=>setShift(p.key, sel.value, p.shift0);
       tr.append(el('td',{class:'l'}, sel, p.shiftEd?el('span',{class:'edmark',title:'Đã sửa tay'},'✎'):null));
@@ -1514,7 +1545,7 @@ function renderStaff(V){
     tr.append(el('td',{class:'num tonc'},z(p.tonTK)), el('td',{class:'num tonc'},z(p.tonBT)), el('td',{class:'num tonc tons'},z(p.tonTK+p.tonBT)));
     tr.append(doneCell(el('td',{class:'num c-tk'},z(p.htTK)),p.name,[p],'TK'), doneCell(el('td',{class:'num c-bt'},z(p.htBT)),p.name,[p],'BT'), doneCell(el('td',{class:'num'},el('b',null,fmt(p.ht))),p.name,[p],'all'));
     { const L=nsLevel(p.ht); tr.append(el('td',{class:'l'}, el('span',{class:'lv lv-'+L.k,title:p.ht+' ca hoàn tất'},L.t))); }
-    tr.append(el('td',{class:'num '+(p.working?(p.pct>=1?'sev-green':p.pct<0.5?'sev-red':'sev-amber'):'')}, p.working?pct(p.pct):'—'));
+    tr.append(el('td',{class:'num '+(p.working?(p.pct>=TH().good?'sev-green':p.pct<TH().bad?'sev-red':'sev-amber'):'')}, p.working?pct(p.pct):'—'));
     tr.append(el('td',{class:'num'}, p.medHrs==null?el('span',{class:'zero'},'—'):fmt(p.medHrs,1)));
     tr.append(el('td',{class:'num'}, z(p.ton)), el('td',{class:'num '+(p.tre?'sev-red':'')}, p.tre?el('b',null,fmt(p.tre)):el('span',{class:'zero'},'0')));
     tr.append(el('td',{class:'num pfx'}, hhmm(p.lastHt)));
@@ -1530,6 +1561,7 @@ function renderStaff(V){
     el('td',{class:'l'}, el('span',{class:'pfx',style:'font-weight:500;margin-right:6px'},'BQ '+fmt(t2.ns,1)+' ca/KTV'), t2.onShift? (L=>el('span',{class:'lv lv-'+L.k},L.t))(nsLevel(Math.round(t2.ns))) : null), el('td',{class:'num'},t2.onShift?pct(t2.ns/R.target):'—'), el('td',{class:'num'},t2.medHrs==null?'—':fmt(t2.medHrs,1)), el('td',{class:'num'},fmt(t2.ton)), el('td',{class:'num'},fmt(loc?t2.treSum:V.people.reduce((s,p)=>s+p.tre,0))), el('td'))));
 }
 $('#search').oninput=()=>renderStaff(view());
+$('#btnCsv').onclick=()=>ACL.exportCsv(window.LAST_ROWS||[]);
 $('#stBlock').onchange=e=>{ STAFF_F.block=e.target.value; renderStaff(view()); };
 $('#stShift').onchange=e=>{ STAFF_F.shift=e.target.value; renderStaff(view()); };
 
@@ -1545,7 +1577,7 @@ function renderAlerts(V){
   V.people.filter(p=>p.working===false && p.ton>0 && !p.tre).forEach(p=>urgent.push({w:20+p.ton, node:li(p,['Nghỉ ('+(p.shift||'O')+') · còn ',el('b',null,p.ton),' tồn'])}));
   urgent.sort((a,b)=>b.w-a.w);
   sec('red','Cần xử lý ngay','trễ hẹn · chưa phân công · nghỉ còn tồn', urgent.map(x=>x.node), 'Không có ca trễ hẹn hay chưa phân công.');
-  const below=V.people.filter(p=>p.working && p.ht<R.target).sort((a,b)=>a.ht-b.ht);
+  const below=V.people.filter(p=>p.working && p.ht<R.target*TH().alert).sort((a,b)=>a.ht-b.ht);
   sec('amber','Dưới mục tiêu','< '+fmt(R.target,1)+' ca', below.map(p=>li(p,[el('b',null,p.ht),' ca · '+pct(p.pct)+(p.ton?' · tồn '+p.ton:'')])), 'Tất cả KTV đi ca đã đạt mục tiêu.');
   const top=V.people.filter(p=>p.working && p.ht>0).sort((a,b)=>b.ht-a.ht||a.name.localeCompare(b.name)).slice(0,5);
   sec('green','Năng suất cao nhất',null, top.map(p=>li(p,[el('b',null,p.ht),' ca · TK '+p.htTK+' · BT '+p.htBT])), 'Chưa có dữ liệu.');
@@ -1591,7 +1623,7 @@ function renderDrawer(){
   const body=el('div',{class:'body'}); d.append(body);
   body.append(el('div',{class:'dstats'},
     el('div',null,el('b',null,fmt(p.ht)),el('span',null,'Hoàn tất (TK '+p.htTK+' · BT '+p.htBT+')')),
-    el('div',null,el('b',{class:p.working?(p.pct>=1?'sev-green':p.pct<0.5?'sev-red':'sev-amber'):''},p.working?pct(p.pct):'—'),el('span',null,'so với mục tiêu '+fmt(R.target,1))),
+    el('div',null,el('b',{class:p.working?(p.pct>=TH().good?'sev-green':p.pct<TH().bad?'sev-red':'sev-amber'):''},p.working?pct(p.pct):'—'),el('span',null,'so với mục tiêu '+fmt(R.target,1))),
     el('div',null,el('b',null,fmt(p.ton)),el('span',null,'Tồn (TK '+p.tonTK+' · BT '+p.tonBT+')')),
     el('div',null,el('b',{class:p.tre?'sev-red':''},fmt(p.tre)),el('span',null,'Trễ hẹn'))));
   const items=(p.items||[]).slice().sort((a,b)=>b.ht-a.ht);
@@ -1790,7 +1822,7 @@ $('#saveRoster').onclick=async()=>{
   const doc={ leaders:DRAFT.leaders.map(l=>({code:l.code,ten:l.ten||l.code,acct:l.acct||''})), staff:DRAFT.staff.map((s,i)=>({_id:s._new?('s'+Date.now().toString(36)+i):s._id,ten:s.ten,acct:s.acct||'',block:s.block||'',leader:s.leader||''})), updatedAt:new Date().toISOString() };
   try{
     if(DB) await DB.doc('team/roster').set(doc); else store.set('roster',doc);
-    ROSTER=doc; DRAFT=clone(doc); DIRTY=false; $('#saveBar').hidden=true; $('#saveMsg').textContent='Có thay đổi chưa lưu'; recompute();
+    ACL.log('roster','Lưu danh sách nhân sự: '+doc.staff.length+' KTV, '+doc.leaders.length+' đội trưởng'); ROSTER=doc; DRAFT=clone(doc); DIRTY=false; $('#saveBar').hidden=true; $('#saveMsg').textContent='Có thay đổi chưa lưu'; recompute();
   }catch(e){ $('#saveMsg').textContent = e && e.code==='invalid_argument' ? 'Bạn không có quyền sửa danh sách này.' : e && e.code==='quota_exceeded' ? 'Hết dung lượng lưu trữ.' : 'Lưu không được: '+(e&&e.message||e)+' — thử lại.'; }
   finally{ b.disabled=false; }
 };
@@ -1814,10 +1846,12 @@ const ROUTES=[
   {h:'nhan-su', g:'gCtl', k:'r6', l:'Danh sách nhân sự', page:'S'},
   {h:'tai-lieu', g:'gTool', k:'x3', l:'Tài liệu kỹ thuật', page:'L', embed:true, desc:'Cẩm nang kỹ thuật hiển thị trực tiếp bên dưới. Bảng tài liệu Google Sheets mở ở tab riêng (Google không cho nhúng).', links:[['Tài liệu kỹ thuật (CustomerService)','https://hdktfpt.github.io/CustomerService/#','Cẩm nang hướng dẫn kỹ thuật chăm sóc khách hàng'],['Bảng tài liệu (Google Sheets)','https://docs.google.com/spreadsheets/d/1PKCqEDLOVCYeDBUzgcVlBKfeA2Auuv_xFN3le5vtMpc/edit?gid=211584159#gid=211584159','Danh mục tài liệu tổng hợp']]},
   {h:'dau-moi', g:'gTool', k:'x4', l:'Thông tin đầu mối hỗ trợ', page:'L', contacts:true, desc:'Email các đội hỗ trợ — tìm theo vấn đề hoặc tên đội, bấm để soạn email hoặc sao chép.', links:[['Thông tin đầu mối hỗ trợ','https://sites.google.com/fpt.com/help-center/support-info','Help Center — support info']]},
-  {h:'dau-moi-hn', g:'gTool', k:'x5', l:'Đầu mối, phòng ban KV Hà Nội', page:'L', directory:true, desc:'Danh bạ đầu mối Khu vực Hà Nội theo chi nhánh — lọc theo chi nhánh, chức năng, tìm theo tên/chức danh/email, bấm để sao chép email hoặc soạn thư.', links:[]}];
+  {h:'dau-moi-hn', g:'gTool', k:'x5', l:'Đầu mối, phòng ban KV Hà Nội', page:'L', directory:true, desc:'Danh bạ đầu mối Khu vực Hà Nội theo chi nhánh — lọc theo chi nhánh, chức năng, tìm theo tên/chức danh/email, bấm để sao chép email hoặc soạn thư.', links:[]},
+  {h:'quan-tri', g:'gAdm', k:'a1', l:'Quản trị', page:'A'},
+  {h:'yeu-cau', g:'gAdm', k:'a2', l:'Đề xuất của tôi', page:'A'}];
 const DEF_ROUTE='bao-cao'; let CUR_TAB=null;
 const FRAMES={};
-const NAVIC={"dau-moi-hn": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5\"/><circle cx=\"17\" cy=\"9\" r=\"2.4\"/><path d=\"M17 14.2c2.4 0 4 1.7 4 4.3\"/></svg>", "kpi-upload": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2M12 12v9M8 16l4-4 4 4\"/></svg>", "kpi-overview": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z\"/></svg>", "kpi-report": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 4h18v16H3zM3 10h18M3 15h18M9 4v16\"/></svg>", "kpi-trend": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M23 6l-9.5 9.5-5-5L1 18M17 6h6v6\"/></svg>", "kpi-tickets": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 2h6v4H9zM9 12h6M9 16h6\"/></svg>", "kpi-health": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19.5 12.6 12 20l-7.5-7.4A5 5 0 0 1 12 6a5 5 0 0 1 7.5 6.6zM7 12h2.5l1.5-3 2 6 1.5-3H17\"/></svg>", "kpi-sales": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0\"/></svg>", "kpi-rules": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6\"/></svg>", "bao-cao": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 12h-4l-3 9L9 3l-3 9H2\"/></svg>", "ton-tkbt": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8\"/></svg>", "csat": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01\"/></svg>", "phan-tich-7n": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 4h18v18H3zM16 2v4M8 2v4M3 10h18\"/></svg>", "hi-fpt": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM12 18h.01\"/></svg>", "tai-lieu": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"/></svg>", "dau-moi": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 14v-2a9 9 0 0 1 18 0v2M21 15a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2zM18 17v1a3 3 0 0 1-3 3h-2\"/></svg>", "nhan-su": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8\"/></svg>"};
+const NAVIC={"quan-tri": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z\"/><path d=\"M9 12l2 2 4-4\"/></svg>", "yeu-cau": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 3l8 3v6c0 4.5-3.2 7.8-8 9-4.8-1.2-8-4.5-8-9V6z\"/><path d=\"M9 12l2 2 4-4\"/></svg>", "dau-moi-hn": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><circle cx=\"9\" cy=\"8\" r=\"3.2\"/><path d=\"M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5\"/><circle cx=\"17\" cy=\"9\" r=\"2.4\"/><path d=\"M17 14.2c2.4 0 4 1.7 4 4.3\"/></svg>", "kpi-upload": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2M12 12v9M8 16l4-4 4 4\"/></svg>", "kpi-overview": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 3h7v9H3zM14 3h7v5h-7zM14 12h7v9h-7zM3 16h7v5H3z\"/></svg>", "kpi-report": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 4h18v16H3zM3 10h18M3 15h18M9 4v16\"/></svg>", "kpi-trend": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M23 6l-9.5 9.5-5-5L1 18M17 6h6v6\"/></svg>", "kpi-tickets": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2M9 2h6v4H9zM9 12h6M9 16h6\"/></svg>", "kpi-health": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M19.5 12.6 12 20l-7.5-7.4A5 5 0 0 1 12 6a5 5 0 0 1 7.5 6.6zM7 12h2.5l1.5-3 2 6 1.5-3H17\"/></svg>", "kpi-sales": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4zM3 6h18M16 10a4 4 0 0 1-8 0\"/></svg>", "kpi-rules": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6\"/></svg>", "bao-cao": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M22 12h-4l-3 9L9 3l-3 9H2\"/></svg>", "ton-tkbt": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M21 8 12 3 3 8v8l9 5 9-5zM3 8l9 5 9-5M12 13v8\"/></svg>", "csat": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01\"/></svg>", "phan-tich-7n": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 4h18v18H3zM16 2v4M8 2v4M3 10h18\"/></svg>", "hi-fpt": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM12 18h.01\"/></svg>", "tai-lieu": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z\"/></svg>", "dau-moi": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 14v-2a9 9 0 0 1 18 0v2M21 15a2 2 0 0 1-2 2h-1v-6h1a2 2 0 0 1 2 2zM3 15a2 2 0 0 0 2 2h1v-6H5a2 2 0 0 0-2 2zM18 17v1a3 3 0 0 1-3 3h-2\"/></svg>", "nhan-su": "<svg width=\"19\" height=\"19\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8zM23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8\"/></svg>"};
 (function buildNav(){ const n=$('#navlist'); let lastG=null, i=0; ROUTES.forEach(r=>{ if(r.g!==lastG){ lastG=r.g; i=0; n.append(el('div',{class:'ngrp','data-k':r.g,'data-i18n':r.g},L(r.g))); } i++; n.append(el('a',{class:'ntab',href:'#'+r.h,id:'nt-'+r.h,title:r.l,'data-k':r.k}, (()=>{const x=el('span',{class:'ni'}); x.innerHTML=NAVIC[r.h]||''; return x;})(), el('span',{class:'lb'},r.l))); }); })();
 function postKpiTab(f){ if(!CUR_TAB) return; try{ f.contentWindow.postMessage({__kpiTab:CUR_TAB},'*'); }catch(e){} }
 function rosterForFrames(){ return ((ROSTER&&ROSTER.staff)||[]).filter(s=>s.acct&&s.leader).map(s=>{ let a=String(s.acct).trim().toUpperCase(); if(a.indexOf('.')<0) a='TIN0301.'+a; return {id:a, leader:s.leader}; }); }
@@ -1825,6 +1859,229 @@ function postRoster(f){ try{ const l=rosterForFrames(); if(l.length) f.contentWi
 function postPref(f){ try{ f.contentWindow.postMessage({__pref:{font:PREF.font,zoom:PREF.zoom,fontCss:fontCss(),gf:FONTS[PREF.font]||'',accent:PREF.accent,bg:PREF.bg}},'*'); }catch(e){} }
 function postTheme(f){ try{ f.contentWindow.postMessage({__theme:document.documentElement.dataset.theme||'light'},'*'); }catch(e){} }
 const CONTACTS=[{"n": 1, "t": "Mọi vấn đề quy trình, giải đáp, hỗ trợ tổng hợp", "b": ["Mọi vấn đề về Quy trình/Nghiệp vụ", "Mọi vấn đề cần giải đáp về Quy trình - nghiệp vụ"], "to": ["ftq.ticket@fpt.com"], "cc": []}, {"n": 2, "t": "Không ký được Biên bản trên Hi-FPT & không lấy được OTP ký BBĐT", "to": ["ftel.hifpt.vanhanh@fpt.com"], "cc": ["binhvpt@fpt.com", "trinm22@fpt.com", "hoadtt9@fpt.com"]}, {"n": 3, "t": "Thanh toán đơn hàng, thanh toán từ MobiX, công nợ và thanh toán online", "to": ["ftel.ttol.ticket@fpt.com"], "cc": ["leltm@fpt.com", "duonglh7@fpt.com"], "link": ["Hướng dẫn chi tiết", "https://sites.google.com/fpt.com/help-center/fag/faq-check-payment-debt"]}, {"n": 4, "t": "Thông số kết nối: chậm, lag, không load thông tin, không ghi nhận SUY HAO", "note": "Gửi INF Hỗ trợ kỹ thuật", "to": ["ftel.inf.ktht@fpt.com"], "cc": ["ftel.ftq.pqa@fpt.com", "trongnm3@fpt.com"], "warn": "#CT533: Kết nối hệ thống thông số công suất thiết bị chưa thành công. Vui lòng thử lại sau 2 - 3 phút hoặc Reset Modem để kết nối lại."}, {"n": 5, "t": "Liên quan đến Kho - Nợ - từ SCM", "to": ["ftelscm.ticket@fpt.com"], "cc": ["dungna36@fpt.com", "ftel.isc.equipment@fpt.com"]}, {"n": 6, "t": "Hỗ trợ liên quan đến CAM (FLI)", "to": ["ftel.fli.support@fpt.com"], "cc": ["ftel.isc.sm@fpt.com"]}, {"n": 7, "t": "Truyền hình (FPL: FPT Play)", "b": ["Không tạo được tài khoản FPT Play", "Box không Online (Active)"], "to": ["ftel.fpl.ticket@fpt.com"], "cc": ["ftel.isc.sm@fpt.com"]}, {"n": 8, "t": "Vấn đề liên quan đến App SaleClub/SOP (SaleClub, SalePlatform)", "to": ["ftel.isc.spf@fpt.com"], "cc": ["thanhdc3@fpt.com"]}, {"n": 9, "t": "Vấn đề liên quan đến App MobiX", "to": ["ftel.isc.mobinet@fpt.com"], "cc": ["thientq3@fpt.com"]}, {"n": 10, "t": "Phiếu thi công, Phiếu bảo trì, PT-PORTAL", "to": ["ftel.isc.tkbt@fpt.com"], "cc": []}, {"n": 11, "t": "Vật tư - Thu hồi - Bảo hành", "to": ["ftel.isc.equipment@fpt.com"], "cc": []}, {"n": 12, "t": "Phân công, Block, Tool nhân sự, IMEI MobiX", "to": ["sangnt31@fpt.com", "xuandt5@fpt.com"], "cc": []}, {"n": 13, "t": "Liên quan Book port", "to": ["phuocpv2@fpt.com"], "cc": ["cuongdv7@fpt.com"]}, {"n": 14, "t": "Thông tin hỗ trợ của Hi-FPT", "to": ["ftel.hifpt.vanhanh@fpt.com"], "cc": ["trinm22@fpt.com"]}, {"n": 15, "t": "Vấn đề OTP và liên quan đến OTP", "to": ["ftel.isc.su2.vanhanh@fpt.com"], "cc": ["hoangcp@fpt.com"]}, {"n": 16, "t": "Liên quan đến Upload hình ảnh IQC", "to": ["vietcn@fpt.com"], "cc": ["cuongdv7@fpt.com", "thientq3@fpt.com"]}, {"n": 17, "t": "Vấn đề PTC SWAP", "b": ["Không đẩy khoản thu của PTC SWAP", "PTC từ Telesale"], "to": ["ftel.isc.tls@fpt.com"], "cc": ["manhdt3@fpt.com"]}, {"n": 18, "t": "ES Checklist và KH không thuộc tập sự cố, Thông số kết nối, Suy hao", "to": ["trongnm3@fpt.com", "annd14@fpt.com"], "cc": ["dinhnn@fpt.com"], "note": "Lưu ý: các issue hệ thống, nghiệp vụ — triển khai, bảo trì, hoàn ứng, phân công, trích xuất data, ..."}, {"n": 19, "t": "Hướng dẫn tạo ticket vận hành", "to": [], "cc": [], "link": ["Mở tài liệu hướng dẫn", "https://docs.google.com/document/d/1Y8sEtCp-9yaITzPcnm3pEH95VfY8ZULS"]}];
+// ================= PHÂN QUYỀN · PHÊ DUYỆT · NHẬT KÝ · SAO LƯU =================
+const ACL_DEFAULT = /*ACL_BEGIN*/{"users":{},"cfg":{}}/*ACL_END*/;
+const ACL=(function(){
+  const ROLES={owner:'Chủ sở hữu',leader:'Đội trưởng',ktv:'KTV',viewer:'Người xem'};
+  const MATRIX={
+    owner:'*',
+    leader:['viewTeam','viewStaffDetail','shift','shiftReq','exportTeam','proposeKtv','dataFix','access'],
+    ktv:['viewSelf','dataFix'],
+    viewer:['viewSummary']
+  };
+  const OWNER_PERMS=[
+    ['Quản lý người dùng và vai trò','Thêm, khóa, xóa tài khoản; gán Chủ sở hữu / Đội trưởng / KTV / Người xem.'],
+    ['Cấp/thu hồi quyền theo đội','Chọn đội trưởng phụ trách đội nào; đội trưởng và KTV chỉ thấy dữ liệu đội mình.'],
+    ['Quản lý nguồn dữ liệu gốc','Tải lên, thay thế, xóa file Excel và file .json.'],
+    ['Xóa hoặc khôi phục dữ liệu','Sao lưu tự động trước khi xóa/thay; khôi phục từ bản sao lưu.'],
+    ['Cấu hình báo cáo','Bật/tắt các khối báo cáo, biểu đồ hiển thị.'],
+    ['Đặt mục tiêu và ngưỡng cảnh báo','Mục tiêu ca/KTV, ngưỡng đạt, ngưỡng kém, ngưỡng cảnh báo.'],
+    ['Quản lý danh mục tổ chức','Sửa danh sách KTV, đội trưởng, block, ca.'],
+    ['Xuất dữ liệu toàn hệ thống','Xuất Excel toàn bộ; đội trưởng chỉ xuất đội mình.'],
+    ['Xem nhật ký hệ thống','Ai nạp/sửa/xóa dữ liệu, đổi quyền, lúc nào.'],
+    ['Phê duyệt thay đổi quan trọng','Duyệt đổi ca, thêm KTV, điều chỉnh số liệu, mở quyền xem.']
+  ];
+  const sk=n=>'sys:'+n;
+  const norm=s=>String(s||'').trim().toLowerCase();
+  const acctKey=a=>{ a=String(a||'').trim().toUpperCase(); return a && a.indexOf('.')<0 ? 'TIN0301.'+a : a; };
+  let ME={email:'',role:'viewer',leader:'',acct:'',locked:false,known:false}, ready=false, bypass=false;
+  let USERS=Object.assign({}, (ACL_DEFAULT&&ACL_DEFAULT.users)||{}, store.get(sk('users'),{}));
+  let REQS=store.get(sk('reqs'),[]), AUDIT=store.get(sk('audit'),[]);
+  let CFG=Object.assign({shiftApproval:true,good:100,bad:50,alert:100,hide:[]}, (ACL_DEFAULT&&ACL_DEFAULT.cfg)||{}, store.get(sk('cfg'),{}));
+  let TAB='users';
+
+  // ---------- lưu trữ ----------
+  async function save(n,v){ store.set(sk(n),v); if(DB){ try{ await DB.doc('sys/'+n).set({v:JSON.stringify(v),at:new Date().toISOString()}); }catch(e){} } }
+  function setLocal(n,v){ if(n==='users') USERS=Object.assign({}, (ACL_DEFAULT&&ACL_DEFAULT.users)||{}, v); else if(n==='reqs') REQS=v; else if(n==='audit') AUDIT=v; else if(n==='cfg') CFG=Object.assign(CFG,v); }
+  function initShared(){ if(!DB) return;
+    ['users','reqs','audit','cfg'].forEach(n=>{ try{ DB.doc('sys/'+n).onSnapshot(s=>{ if(s.exists){ try{ const v=JSON.parse(s.data().v); setLocal(n,v); store.set(sk(n),v); onChange(); }catch(e){} } },()=>{}); }catch(e){} }); }
+  function onChange(){ applyCfg(); applyNav(); if(!$('#pageA').hidden) renderPage(); }
+
+  // ---------- vai trò ----------
+  const can=p=>{ const m=MATRIX[ME.role]; return m==='*' || (m||[]).includes(p); };
+  const isOwner=()=>ME.role==='owner';
+  function login(email,ownerFlag){
+    email=norm(email); const u=USERS[email];
+    let role = (isOwnerMail(email)||ownerFlag) ? 'owner' : (u && !u.locked ? (ROLES[u.role]?u.role:'viewer') : 'viewer');
+    ME={email,role,leader:u?(u.leader||''):'',acct:u?(u.acct||''):'',locked:!!(u&&u.locked)&&role!=='owner',known:!!u||role==='owner'};
+    ready=true;
+    if(ME.locked){ try{ firebase.auth().signOut(); }catch(e){} toast('Tài khoản '+email+' đã bị khóa — liên hệ chủ sở hữu.',true); }
+    setAdmin(role==='owner'); document.documentElement.classList.remove('role-owner','role-leader','role-ktv','role-viewer'); document.documentElement.classList.add('role-'+role);
+    log('login','Đăng nhập · '+ROLES[role]); applyCfg(); applyNav();
+    try{ route(); recompute(); }catch(e){}
+  }
+  const label=()=>ROLES[ME.role]+(ME.email?' · '+ME.email:'');
+  function scopeLeader(){
+    if(ME.role==='leader') return ME.leader||'__none';
+    if(ME.role==='ktv'){ const a=acctKey(ME.acct); const p=((ROSTER&&ROSTER.staff)||[]).find(s=>acctKey(s.acct)===a); return p&&p.leader?p.leader:'__none'; }
+    return null;
+  }
+  function allowLeader(code){ const s=scopeLeader(); return s===null || code===s; }
+  function enforce(){ const s=scopeLeader(); if(s!==null && ready && FILTER.leader!==s) FILTER={leader:s,blocks:FILTER.blocks&&FILTER.leader===s?FILTER.blocks:null}; }
+  function filterTabs(opts){ const s=scopeLeader(); return s===null?opts:opts.filter(o=>o[0]===s); }
+  function rowOk(p){ if(ME.role!=='ktv') return true; return acctKey(p.acct)===acctKey(ME.acct); }
+  function allowRoute(h){ if(!ready) return true;
+    if(h==='quan-tri') return isOwner();
+    if(h==='yeu-cau') return ME.role==='leader'||ME.role==='ktv';
+    if(h==='nhan-su') return ME.role==='owner'||ME.role==='leader';
+    if(/^kpi-/.test(h)) return ME.role==='owner'||ME.role==='leader';
+    return true; }
+  function applyNav(){ ROUTES.forEach(r=>{ const a=$('#nt-'+r.h); if(a) a.style.display = allowRoute(r.h)?'':'none'; }); document.querySelectorAll('#navlist .ngrp').forEach(g=>{ let n=g.nextElementSibling, any=false; while(n && !n.classList.contains('ngrp')){ if(n.style.display!=='none') any=true; n=n.nextElementSibling; } g.style.display=any?'':'none'; });
+    const pend=REQS.filter(q=>q.status==='pending').length, a=$('#nt-quan-tri'); if(a){ let b=a.querySelector('.rq-b'); if(!b){ b=el('em',{class:'rq-b'}); a.append(b); } b.textContent=pend||''; b.style.display=pend?'':'none'; } }
+  const TH=()=>({good:(+CFG.good||100)/100,bad:(+CFG.bad||50)/100,alert:(+CFG.alert||100)/100});
+
+  // ---------- cấu hình hiển thị ----------
+  const PANELS=[['grpPanel','Tồn & năng suất theo đội trưởng','#grpPanel'],['alerts','Cảnh báo (cần xử lý, dưới mục tiêu, cao nhất)','#alerts'],['assignPanel','Phân việc gợi ý xử lý tồn','#assignPanel'],['staffPanel','Năng suất theo nhân sự','#staffPanel'],['chHour','Biểu đồ ca hoàn tất theo giờ','section.panel:has(#chHour)'],['chNs','Biểu đồ năng suất theo block','section.panel:has(#chNs)'],['chTon','Biểu đồ ca tồn theo block','section.panel:has(#chTon)'],['hist','Lịch sử nạp dữ liệu','section.panel:has(#hist)']];
+  function applyCfg(){ let st=document.getElementById('aclCss'); if(!st){ st=document.createElement('style'); st.id='aclCss'; document.head.append(st); }
+    const hide=PANELS.filter(p=>(CFG.hide||[]).includes(p[0])).map(p=>p[2]+'{display:none!important}').join('\n');
+    st.textContent=hide+`
+html.role-ktv #grpPanel,html.role-ktv #assignPanel,html.role-ktv #alerts{display:none!important}
+html.role-viewer #staffPanel,html.role-viewer #assignPanel,html.role-viewer #alerts{display:none!important}
+html:not(.role-owner) #btnPick,html:not(.role-owner) #rDefault{display:none!important}
+html.role-ktv #btnCsv,html.role-viewer #btnCsv{display:none!important}`; }
+
+  // ---------- nhật ký ----------
+  function log(act,detail){ AUDIT.push({t:new Date().toISOString(),u:ME.email||'(chưa đăng nhập)',r:ME.role,a:act,d:detail||''}); if(AUDIT.length>600) AUDIT=AUDIT.slice(-600); save('audit',AUDIT); }
+
+  // ---------- yêu cầu / phê duyệt ----------
+  function addReq(type,payload,text){ REQS.push({id:'q'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),t:new Date().toISOString(),by:ME.email,team:ME.leader||scopeLeader()||'',type,text,payload,status:'pending'}); save('reqs',REQS); log('request','Gửi đề xuất: '+text); applyNav(); }
+  const TYPE_L={shift:'Đổi ca trực',addKtv:'Thêm KTV vào đội',dataFix:'Chỉnh sửa số liệu',access:'Mở quyền xem dữ liệu'};
+  function shiftGate(id,code,orig){
+    if(bypass) return false;
+    if(!ready || isOwner()) return false;
+    const p=R.people.find(x=>x.key===id);
+    if(ME.role==='leader'){
+      if(p && ME.leader && p.leader!==ME.leader){ toast('Chỉ đổi được ca của KTV trong đội '+ME.leader+'.',true); recompute(); return true; }
+      if(CFG.shiftApproval){ addReq('shift',{id,code,orig,day:R.ymd,name:p?p.name:id},'Đổi ca '+(p?p.name:id)+' → '+code+' ngày '+dmy(R.repDate)); toast('Đã gửi đề xuất đổi ca — chờ chủ sở hữu duyệt.'); recompute(); return true; }
+      log('shift','Đổi ca '+(p?p.name:id)+' → '+code); return false;
+    }
+    toast('Bạn không có quyền đổi ca.',true); recompute(); return true;
+  }
+  async function applyShift(rq){ bypass=true; try{ const day=rq.payload.day; if(R.ymd!==day){ const m=Object.assign({},SHIFTS[day]||{}); if(rq.payload.code===rq.payload.orig) delete m[rq.payload.id]; else m[rq.payload.id]=rq.payload.code; SHIFTS=Object.assign({},SHIFTS,{[day]:m}); store.set('shifts',SHIFTS); if(DB){ try{ await DB.doc('shifts/'+day).set({map:m,at:new Date().toISOString()}); }catch(e){} } recompute(); } else await setShift(rq.payload.id,rq.payload.code,rq.payload.orig); } finally{ bypass=false; } }
+  async function applyAddKtv(rq){ const d=JSON.parse(JSON.stringify(ROSTER||{leaders:[],staff:[]})); const q=rq.payload; d.staff.push({_id:'s'+Date.now().toString(36),ten:q.ten,acct:q.acct,block:q.block||'',leader:q.leader||''}); if(DB) await DB.doc('team/roster').set(d); else store.set('roster',d); ROSTER=d; DRAFT=JSON.parse(JSON.stringify(d)); recompute(); }
+  async function decide(rq,ok,note){
+    if(!needAdmin()) return;
+    try{ if(ok && rq.type==='shift') await applyShift(rq); if(ok && rq.type==='addKtv') await applyAddKtv(rq); }catch(e){ toast('Không áp dụng được: '+(e&&e.message||e),true); return; }
+    rq.status=ok?'approved':'rejected'; rq.by2=ME.email; rq.t2=new Date().toISOString(); rq.note=note||''; save('reqs',REQS); log('approve',(ok?'Duyệt':'Từ chối')+': '+rq.text+(note?' — '+note:'')); applyNav(); renderPage();
+    toast(ok?'Đã duyệt'+(rq.type==='shift'||rq.type==='addKtv'?' và áp dụng.':'.'):'Đã từ chối.'); }
+
+  // ---------- sao lưu (IndexedDB) ----------
+  async function snaps(){ try{ return (await idbGet('snaps'))||[]; }catch(e){ return []; } }
+  async function snap(label){ try{ const list=await snaps(); list.push({id:'b'+Date.now().toString(36),t:new Date().toISOString(),by:ME.email,label,files:snapFiles(),roster:ROSTER,shifts:SHIFTS}); while(list.length>10) list.shift(); await idbSet('snaps',list); }catch(e){} }
+  async function restore(id){ if(!needAdmin()) return; const list=await snaps(); const s=list.find(x=>x.id===id); if(!s){ toast('Không tìm thấy bản sao lưu.',true); return; }
+    await snap('Tự động trước khi khôi phục');
+    ['ton','done','lich'].forEach(k=>{ delete RAW[k]; delete META[k]; }); let n=0;
+    Object.keys(s.files||{}).forEach(k=>{ if(applySaved(k,s.files[k],false)){ META[k].local=true; n++; } });
+    if(s.roster){ ROSTER=JSON.parse(JSON.stringify(s.roster)); DRAFT=JSON.parse(JSON.stringify(ROSTER)); store.set('roster',ROSTER); if(DB){ try{ await DB.doc('team/roster').set(ROSTER); }catch(e){} } }
+    if(s.shifts){ SHIFTS=s.shifts; store.set('shifts',SHIFTS); }
+    uploadedAt=new Date(); recompute(); for(const k of Object.keys(s.files||{})) await saveFile(k);
+    log('restore','Khôi phục bản sao lưu '+dmyhm(new Date(s.t))+' ('+n+' file)'); toast('Đã khôi phục '+n+' file + danh sách nhân sự + ca trực từ bản sao lưu.'); renderPage(); }
+
+  // ---------- xuất ----------
+  function dl(blob,name){ const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.append(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },500); }
+  const stamp=()=>{ const d=new Date(); return d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate()); };
+  function staffAoa(rows){ return [['Nhân sự','Account','Block','Đội trưởng','Ca','Tồn TK','Tồn BT','NS TK','NS BT','NS tổng','% mục tiêu','TGXL (h)','Trễ hẹn']].concat(rows.map(p=>[p.name,p.acct||'',p.block||'',p.leader||'',p.shift||'',p.tonTK,p.tonBT,p.htTK,p.htBT,p.ht,p.working?Math.round(p.pct*1000)/10:'',p.medHrs==null?'':Math.round(p.medHrs*10)/10,p.tre])); }
+  function exportCsv(rows){
+    if(!(isOwner()||can('exportTeam'))){ toast('Bạn không có quyền xuất dữ liệu.',true); return; }
+    const csv='﻿'+staffAoa(rows).map(r=>r.map(c=>{ c=String(c==null?'':c); return /[",\n;]/.test(c)?'"'+c.replace(/"/g,'""')+'"':c; }).join(',')).join('\r\n');
+    dl(new Blob([csv],{type:'text/csv;charset=utf-8'}),'nang-suat-'+(scopeLeader()||'toan-don-vi')+'-'+stamp()+'.csv'); log('export','Xuất CSV '+rows.length+' dòng ('+scopeLabel()+')'); }
+  function exportAll(){ if(!needAdmin()) return; const wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(staffAoa(R.people)),'Năng suất nhân sự');
+    const items=[['Nhân sự','Account','Đội trưởng','Hợp đồng','Loại','Tác vụ','Tạo phiếu','Hoàn tất','TGXL (h)']]; R.people.forEach(p=>(p.items||[]).forEach(it=>items.push([p.name,p.acct||'',p.leader||'',it.hd,isTK(it)?'TK':'BT',it.tv,it.tao?dmyhm(it.tao):'',it.ht?dmyhm(it.ht):'',it.hrs==null?'':Math.round(it.hrs*10)/10])));
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(items),'Ca hoàn tất');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Mã','Họ tên','Account']].concat(((ROSTER&&ROSTER.leaders)||[]).map(l=>[l.code,l.ten,l.acct]))),'Đội trưởng');
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet([['Thời gian','Người dùng','Vai trò','Hành động','Chi tiết']].concat(AUDIT.map(a=>[dmyhm(new Date(a.t)),a.u,ROLES[a.r]||a.r,a.a,a.d]))),'Nhật ký');
+    XLSX.writeFile(wb,'bao-cao-toan-he-thong-'+stamp()+'.xlsx'); log('export','Xuất Excel toàn hệ thống'); }
+  async function downloadIndex(){
+    try{ const r=await fetch(location.href.split('#')[0],{cache:'no-store'}); if(!r.ok) throw 0; let t=await r.text(); const B='/*ACL_'+'BEGIN*/', E='/*ACL_'+'END*/'; const i=t.indexOf(B), j=t.indexOf(E); if(i<0||j<0) throw 0;
+      t=t.slice(0,i+B.length)+JSON.stringify({users:USERS,cfg:CFG})+t.slice(j); dl(new Blob([t],{type:'text/html'}),'index.html'); toast('Đã tải index.html có phân quyền mới — đưa lên GitHub thay file cũ để áp dụng cho mọi người.'); log('export','Tải index.html kèm phân quyền'); }
+    catch(e){ dl(new Blob([JSON.stringify({users:USERS,cfg:CFG},null,1)],{type:'application/json'}),'phan-quyen.json'); toast('Không tải được mã nguồn trang — đã tải phan-quyen.json thay thế.',true); } }
+
+  // ---------- giao diện quản trị ----------
+  const fdt=s=>{ try{ return dmyhm(new Date(s)); }catch(e){ return s; } };
+  function tabs(list){ const bar=el('div',{class:'acl-tabs'}); list.forEach(([k,l])=>{ const b=el('button',{type:'button',class:'acl-tab'+(TAB===k?' on':'')},l); b.onclick=()=>{ TAB=k; renderPage(); }; bar.append(b); }); return bar; }
+  function tbl(head,rows){ const t=el('table',{class:'acl-t'}); t.append(el('thead',null,el('tr',null,...head.map(h=>el('th',{class:'l'},h))))); const tb=el('tbody'); rows.forEach(r=>tb.append(r)); t.append(tb); return el('div',{class:'tscroll'},t); }
+  const td=(...c)=>el('td',{class:'l'},...c);
+  function tabUsers(b){
+    b.append(el('p',{class:'lk-d'},'Danh sách tài khoản và vai trò. Tài khoản không có trong danh sách mặc định là “Người xem”. Chủ sở hữu ('+OWNER_EMAIL+') luôn có toàn quyền.'));
+    const leadersL=((ROSTER&&ROSTER.leaders)||[]).map(l=>l.code);
+    const rows=Object.entries(USERS).sort().map(([em,u])=>{
+      const rs=el('select'); ['leader','ktv','viewer'].forEach(r=>rs.append(el('option',{value:r},ROLES[r]))); rs.value=u.role||'viewer';
+      const ld=el('select'); ld.append(el('option',{value:''},'— đội —')); leadersL.forEach(c=>ld.append(el('option',{value:c},c))); ld.value=u.leader||'';
+      const ac=el('input',{type:'text',value:u.acct||'',placeholder:'TIN0301.…',style:'width:150px'});
+      const upd=()=>{ u.role=rs.value; u.leader=ld.value; u.acct=ac.value.trim(); save('users',USERS); log('user','Cập nhật '+em+': '+ROLES[u.role]+(u.leader?' · đội '+u.leader:'')+(u.acct?' · '+u.acct:'')); renderPage(); };
+      rs.onchange=upd; ld.onchange=upd; ac.onchange=upd;
+      const lk=el('button',{type:'button',class:'lk-b'},u.locked?'Mở khóa':'Khóa'); lk.onclick=()=>{ u.locked=!u.locked; save('users',USERS); log('user',(u.locked?'Khóa ':'Mở khóa ')+em); renderPage(); };
+      const rm=el('button',{type:'button',class:'lk-b'},'Xóa'); rm.onclick=()=>{ if(confirm('Xóa tài khoản '+em+'?')){ delete USERS[em]; save('users',USERS); log('user','Xóa '+em); renderPage(); } };
+      return el('tr',u.locked?{style:'opacity:.55'}:null,td(em),td(rs),td(u.role==='leader'?ld:el('span',{class:'pfx'},'—')),td(u.role==='ktv'?ac:el('span',{class:'pfx'},'—')),td(lk,' ',rm)); });
+    b.append(tbl(['Email','Vai trò','Đội phụ trách (đội trưởng)','Account (KTV)','Thao tác'],rows.length?rows:[el('tr',null,el('td',{class:'l',colspan:5},'Chưa có tài khoản nào — thêm bên dưới.'))]));
+    const em=el('input',{type:'email',placeholder:'email@gmail.com',style:'min-width:240px'}); const rs=el('select'); ['leader','ktv','viewer'].forEach(r=>rs.append(el('option',{value:r},ROLES[r])));
+    const ld=el('select'); ld.append(el('option',{value:''},'— đội (nếu là đội trưởng) —')); leadersL.forEach(c=>ld.append(el('option',{value:c},c)));
+    const ac=el('input',{type:'text',placeholder:'Account KTV (nếu là KTV)',style:'width:190px'});
+    const add=el('button',{type:'button',class:'lk-b pri'},'Thêm tài khoản'); add.onclick=()=>{ const e=norm(em.value); if(!/^\S+@\S+\.\S+$/.test(e)){ toast('Email không hợp lệ.',true); return; } if(isOwnerMail(e)){ toast('Đây là chủ sở hữu — luôn có toàn quyền.',true); return; } USERS[e]={role:rs.value,leader:rs.value==='leader'?ld.value:'',acct:rs.value==='ktv'?ac.value.trim():'',locked:false,at:new Date().toISOString()}; save('users',USERS); log('user','Thêm '+e+' · '+ROLES[rs.value]); renderPage(); };
+    b.append(el('div',{class:'acl-add'},em,rs,ld,ac,add));
+    const dlb=el('button',{type:'button',class:'lk-b'},'Tải index.html kèm phân quyền (để áp dụng trên GitHub)'); dlb.onclick=downloadIndex;
+    b.append(el('div',{class:'acl-note'},'Lưu ý: ',DB?'danh sách này được lưu chung. ':'danh sách này mới lưu trên trình duyệt của bạn — máy khác chỉ thấy khi bạn bấm nút bên dưới và đưa file index.html mới lên GitHub. ',el('br'),dlb));
+  }
+  function tabApprove(b){
+    const pend=REQS.filter(q=>q.status==='pending'), done=REQS.filter(q=>q.status!=='pending').slice(-30).reverse();
+    b.append(el('p',{class:'lk-d'},'Đề xuất của đội trưởng/KTV cần chủ sở hữu duyệt. Duyệt “Đổi ca” và “Thêm KTV” sẽ tự áp dụng; “Chỉnh sửa số liệu” và “Mở quyền” chỉ ghi nhận quyết định.'));
+    const mk=(q,act)=>{ const r=el('tr',null,td(fdt(q.t)),td(q.by+(q.team?' · '+q.team:'')),td(TYPE_L[q.type]||q.type),td(q.text)); if(act){ const note=el('input',{type:'text',placeholder:'Ghi chú…',style:'width:130px'}); const ok=el('button',{type:'button',class:'lk-b pri'},'Duyệt'), no=el('button',{type:'button',class:'lk-b'},'Từ chối'); ok.onclick=()=>decide(q,true,note.value); no.onclick=()=>decide(q,false,note.value); r.append(td(note,' ',ok,' ',no)); } else r.append(td((q.status==='approved'?'✓ Đã duyệt':'✗ Từ chối')+' · '+(q.by2||'')+' · '+fdt(q.t2)+(q.note?' — '+q.note:''))); return r; };
+    b.append(el('h4',null,'Chờ duyệt ('+pend.length+')'),pend.length?tbl(['Thời gian','Người gửi','Loại','Nội dung','Quyết định'],pend.map(q=>mk(q,true))):el('div',{class:'pfx'},'Không có đề xuất nào đang chờ.'));
+    if(done.length) b.append(el('h4',null,'Đã xử lý gần đây'),tbl(['Thời gian','Người gửi','Loại','Nội dung','Kết quả'],done.map(q=>mk(q,false))));
+  }
+  function tabCfg(b){
+    b.append(el('p',{class:'lk-d'},'Mục tiêu và ngưỡng áp dụng cho toàn bộ báo cáo, bảng và cảnh báo.'));
+    const f=el('div',{class:'acl-form'});
+    const num=(lab,val,min,max,step,on)=>{ const i=el('input',{type:'number',value:val,min,max,step}); i.onchange=()=>on(+i.value); f.append(el('label',null,lab,i)); };
+    num('Mục tiêu ca hoàn tất / KTV / ngày',+$('#target').value||6,1,30,0.5,v=>{ $('#target').value=v; store.set('target',v); log('config','Mục tiêu = '+v); recompute(); });
+    num('Ngưỡng “đạt” (% mục tiêu)',CFG.good,50,200,5,v=>{ CFG.good=v; save('cfg',CFG); log('config','Ngưỡng đạt = '+v+'%'); recompute(); });
+    num('Ngưỡng “kém” (% mục tiêu)',CFG.bad,0,100,5,v=>{ CFG.bad=v; save('cfg',CFG); log('config','Ngưỡng kém = '+v+'%'); recompute(); });
+    num('Cảnh báo khi dưới (% mục tiêu)',CFG.alert,10,200,5,v=>{ CFG.alert=v; save('cfg',CFG); log('config','Ngưỡng cảnh báo = '+v+'%'); recompute(); });
+    const cb=el('input',{type:'checkbox'}); cb.checked=!!CFG.shiftApproval; cb.onchange=()=>{ CFG.shiftApproval=cb.checked; save('cfg',CFG); log('config','Đội trưởng đổi ca '+(cb.checked?'cần duyệt':'không cần duyệt')); };
+    f.append(el('label',{class:'acl-ck'},cb,' Đội trưởng đổi ca phải được chủ sở hữu duyệt')); b.append(f);
+    b.append(el('h4',null,'Khối báo cáo hiển thị (cho mọi người dùng)'));
+    const g=el('div',{class:'acl-form'}); PANELS.forEach(([k,l])=>{ const c=el('input',{type:'checkbox'}); c.checked=!(CFG.hide||[]).includes(k); c.onchange=()=>{ const s=new Set(CFG.hide||[]); c.checked?s.delete(k):s.add(k); CFG.hide=[...s]; save('cfg',CFG); log('config',(c.checked?'Hiện ':'Ẩn ')+l); applyCfg(); }; g.append(el('label',{class:'acl-ck'},c,' '+l)); }); b.append(g);
+  }
+  async function tabSnap(b){
+    b.append(el('p',{class:'lk-d'},'Hệ thống tự sao lưu trước khi tải lên/xóa/nạp .json/khôi phục (giữ 10 bản gần nhất, lưu trên trình duyệt này). Khôi phục sẽ đưa lại file dữ liệu, danh sách nhân sự và ca trực.'));
+    const mk=el('button',{type:'button',class:'lk-b pri'},'Tạo bản sao lưu ngay'); mk.onclick=async()=>{ await snap('Thủ công'); log('backup','Tạo bản sao lưu thủ công'); toast('Đã tạo bản sao lưu.'); renderPage(); }; b.append(mk);
+    const list=(await snaps()).slice().reverse(); const holder=el('div'); b.append(holder);
+    holder.append(list.length?tbl(['Thời gian','Người tạo','Lý do','Nội dung','Thao tác'],list.map(s=>{ const rb=el('button',{type:'button',class:'lk-b'},'Khôi phục'); rb.onclick=()=>{ if(confirm('Khôi phục bản sao lưu '+fdt(s.t)+'? Dữ liệu hiện tại sẽ được sao lưu trước.')) restore(s.id); }; return el('tr',null,td(fdt(s.t)),td(s.by||'—'),td(s.label||''),td(Object.keys(s.files||{}).length+' file · '+(((s.roster||{}).staff||[]).length)+' nhân sự'),td(rb)); })):el('div',{class:'pfx',style:'margin-top:10px'},'Chưa có bản sao lưu.'));
+  }
+  function tabLog(b){
+    const q=el('input',{type:'search',class:'dm-s',placeholder:'Lọc nhật ký theo người, hành động, nội dung…'}); const out=el('div'); b.append(q,out);
+    const draw=()=>{ const k=norm(q.value); const rows=AUDIT.slice().reverse().filter(a=>!k||norm(a.u+' '+a.a+' '+a.d).includes(k)).slice(0,300); out.textContent=''; out.append(tbl(['Thời gian','Người dùng','Vai trò','Hành động','Chi tiết'],rows.map(a=>el('tr',null,td(fdt(a.t)),td(a.u),td(ROLES[a.r]||a.r),td(a.a),td(a.d))))); };
+    q.oninput=draw; draw(); }
+  function tabExport(b){
+    b.append(el('p',{class:'lk-d'},'Xuất toàn bộ năng suất nhân sự, ca hoàn tất, danh sách đội trưởng và nhật ký ra một file Excel.'));
+    const x=el('button',{type:'button',class:'lk-b pri'},'Xuất Excel toàn hệ thống'); x.onclick=exportAll; b.append(x);
+    b.append(el('h4',null,'10 quyền chỉ chủ sở hữu có'),el('ol',{class:'acl-ol'},...OWNER_PERMS.map(([t,d])=>el('li',null,el('b',null,t),' — '+d))));
+    b.append(el('h4',null,'Quyền của đội trưởng'),el('ul',{class:'acl-ol'},...['Xem năng suất, tồn, ca hoàn tất và chi tiết từng KTV của đội mình','Đề xuất đổi ca/block cho KTV trong đội (chủ sở hữu duyệt)','Đề xuất thêm KTV; gửi yêu cầu chỉnh sửa số liệu sai; xin mở quyền xem','Xuất báo cáo (CSV) của đội mình'].map(t=>el('li',null,t))),el('div',{class:'acl-note'},'KTV: chỉ thấy tiến độ cá nhân trong đội mình. Người xem: chỉ xem báo cáo tổng hợp.'));
+  }
+  function tabMine(b){
+    b.append(el('p',{class:'lk-d'},'Gửi đề xuất cho chủ sở hữu duyệt. Bạn đang là '+ROLES[ME.role]+(ME.leader?' · đội '+ME.leader:'')+'.'));
+    const frm=(title,fields,type,mk)=>{ const f=el('div',{class:'acl-card'},el('b',null,title)); const ins=fields.map(([ph,w])=>{ const i=el('input',{type:'text',placeholder:ph,style:'width:'+(w||200)+'px'}); f.append(i); return i; }); const bt=el('button',{type:'button',class:'lk-b pri'},'Gửi đề xuất'); bt.onclick=()=>{ const v=ins.map(i=>i.value.trim()); if(!v[0]){ toast('Điền đủ thông tin.',true); return; } const r=mk(v); addReq(type,r.payload,r.text); toast('Đã gửi đề xuất.'); ins.forEach(i=>i.value=''); renderPage(); }; f.append(bt); b.append(f); };
+    if(can('proposeKtv')) frm('Đề xuất thêm KTV vào đội',[['Họ tên',180],['Account (TIN0301.…)',170],['Block',150]],'addKtv',v=>({payload:{ten:v[0],acct:v[1],block:v[2],leader:ME.leader},text:'Thêm KTV '+v[0]+' ('+v[1]+') vào đội '+(ME.leader||'—')}));
+    if(can('dataFix')) frm('Yêu cầu chỉnh sửa số liệu sai',[['Mô tả số liệu sai (KTV/hợp đồng/ngày, giá trị đúng)',520]],'dataFix',v=>({payload:{note:v[0]},text:'Sửa số liệu: '+v[0]}));
+    if(can('access')) frm('Xin mở quyền xem dữ liệu',[['Cần xem dữ liệu nào, vì sao',520]],'access',v=>({payload:{note:v[0]},text:'Xin quyền xem: '+v[0]}));
+    const mine=REQS.filter(q=>q.by===ME.email).slice().reverse();
+    b.append(el('h4',null,'Đề xuất của tôi'),mine.length?tbl(['Thời gian','Loại','Nội dung','Trạng thái'],mine.map(q=>el('tr',null,td(fdt(q.t)),td(TYPE_L[q.type]||q.type),td(q.text),td(q.status==='pending'?'⏳ Chờ duyệt':q.status==='approved'?'✓ Đã duyệt'+(q.note?' — '+q.note:''):'✗ Từ chối'+(q.note?' — '+q.note:'')))) ):el('div',{class:'pfx'},'Chưa có đề xuất nào.'));
+  }
+  function renderPage(cur){
+    const b=$('#pageA'); if(!b) return; b.textContent=''; const wrap=el('div',{class:'lkp'}); b.append(wrap);
+    const h=(location.hash||'').replace('#','');
+    if(h==='yeu-cau'){ if(!allowRoute('yeu-cau')){ wrap.append(el('p',{class:'lk-d'},'Trang này dành cho đội trưởng và KTV.')); return; } tabMine(wrap); return; }
+    if(!isOwner()){ wrap.append(el('p',{class:'lk-d'},ready?'Trang quản trị chỉ dành cho chủ sở hữu.':'Đang xác thực tài khoản…')); return; }
+    const pend=REQS.filter(q=>q.status==='pending').length;
+    wrap.append(tabs([['users','Người dùng & vai trò'],['approve','Phê duyệt'+(pend?' ('+pend+')':'')],['cfg','Mục tiêu & cấu hình'],['snap','Sao lưu & khôi phục'],['log','Nhật ký'],['export','Xuất & quyền']]));
+    const body=el('div',{class:'acl-body'}); wrap.append(body);
+    ({users:tabUsers,approve:tabApprove,cfg:tabCfg,snap:tabSnap,log:tabLog,export:tabExport}[TAB]||tabUsers)(body);
+  }
+  return {login,label,can,isOwner,scopeLeader,allowLeader,enforce,filterTabs,rowOk,allowRoute,applyNav,applyCfg,TH,shiftGate,log,snap,initShared,renderPage,exportCsv,get ME(){ return ME; },get ready(){ return ready; },get CFG(){ return CFG; }};
+})();
+const TH=()=>ACL.TH();
+
 const DIRECTORY=[["Lê Thanh Bình","Giám đốc Khu vực","Ban Giám đốc Khu vực Hà Nội","Lãnh đạo","4711","binhlt6@fpt.com"],["Đoàn Vân Anh","Phó Giám đốc Khu vực","Ban Giám đốc Khu vực Hà Nội","Lãnh đạo","1426","anhdv4@fpt.com"],["Nguyễn Xuân Bách","Giám đốc chi nhánh","Trung tâm HN1","Lãnh đạo","42214/4918","bachnx3@fpt.com"],["Nguyễn Tuấn Thành","Trưởng phòng Quản lý đối tác 1","Trung tâm HN1","Kỹ thuật, hạ tầng","4624","thanhnt33@fpt.com"],["Nguyễn Minh Đức","Đội trưởng","Trung tâm HN1","Kỹ thuật, hạ tầng","4652","ducnm3@vienthongtin.com"],["Đỗ Mạnh Tuyên","Đội trưởng","Trung tâm HN1","Kỹ thuật, hạ tầng","47225","tuyendm1@vienthongtin.com"],["Nguyễn Văn Đoài","Đội trưởng","Trung tâm HN1","Kỹ thuật, hạ tầng","","doainv@vienthongtin.com"],["Đào Việt Hà","Trưởng phòng Quản lý đối tác 2","Trung tâm HN1","Kỹ thuật, hạ tầng","4353","hadv10@fpt.com"],["Phạm Xuân Triều","Đội trưởng","Trung tâm HN1","Kỹ thuật, hạ tầng","40622","trieupx@vienthongtin.com"],["Bùi Xuân Đạo","Đội trưởng","Trung tâm HN1","Kỹ thuật, hạ tầng","","daobx@vienthongtin.com"],["Bùi Thị Thu Hà","Trưởng phòng DVKH 1","Trung tâm HN1","Dịch vụ khách hàng","4669","habtt4@fpt.com"],["Lê Thị Phương Hoa","Trưởng phòng DVKH 2","Trung tâm HN1","Dịch vụ khách hàng","4343","hoaltp@fpt.com"],["Trịnh Mai Phương","Hành chính nhân sự · HN1.1","Trung tâm HN1","Hành chính, nhân sự, kế toán","4168","phuongtm3@fpt.com"],["Cao Thị Thanh Nhàn","Hành chính nhân sự · HN1.2","Trung tâm HN1","Hành chính, nhân sự, kế toán","40505","nhanctt3@fpt.com"],["Phạm Quang Hiếu","Giám đốc chi nhánh","Trung tâm HN2","Lãnh đạo","4799","hieupq@fpt.com"],["Đinh Hữu Cường","Trưởng phòng Quản lý đối tác 1","Trung tâm HN2","Kỹ thuật, hạ tầng","4156","cuongdh14@fpt.com"],["Nguyễn Văn Chuân","Đội trưởng","Trung tâm HN2","Kỹ thuật, hạ tầng","40307","chuannv@vienthongtin.com"],["Tô Đình Đạt","Đội trưởng","Trung tâm HN2","Kỹ thuật, hạ tầng","47912","dattd@vienthongtin.com"],["Phạm Đức Việt","Trưởng phòng Quản lý đối tác 2","Trung tâm HN2","Kỹ thuật, hạ tầng","4452","vietpd9@fpt.com"],["Lê Mạnh Cường","Đội trưởng","Trung tâm HN2","Kỹ thuật, hạ tầng","47081","cuonglm2@vienthongtin.com"],["Lê Chiến Chinh","Đội trưởng","Trung tâm HN2","Kỹ thuật, hạ tầng","47221","chinhlc@vienthongtin.com"],["Trần Xuân Sơn","Đội trưởng","Trung tâm HN2","Kỹ thuật, hạ tầng","","sontx@vienthongtin.com"],["Nguyễn Thị Xuân Thúy","Trưởng phòng DVKH 1","Trung tâm HN2","Dịch vụ khách hàng","4249","thuyntx2@fpt.com"],["Lê Thị Khánh Hương","Trưởng phòng DVKH 2","Trung tâm HN2","Dịch vụ khách hàng","4340","huongltk@fpt.com"],["Ngô Thị Xuân Thủy","Phó phòng DVKH 2","Trung tâm HN2","Dịch vụ khách hàng","4667","thuyntx3@fpt.com"],["Nguyễn Thị Hồng Hạnh","Hành chính nhân sự · HN2.1","Trung tâm HN2","Hành chính, nhân sự, kế toán","4336","hanhnth8@fpt.com"],["Phạm Thu Phương","Hành chính nhân sự · HN2.2","Trung tâm HN2","Hành chính, nhân sự, kế toán","4435","phuongpt10@fpt.com"],["Lại Hoàng Mạnh","Giám đốc chi nhánh","Trung tâm HN3","Lãnh đạo","4280","manhlh@fpt.com"],["Phạm Tuấn Lộc","Trưởng phòng Quản lý đối tác 1","Trung tâm HN3","Kỹ thuật, hạ tầng","4779","locpt9@fpt.com"],["Nguyễn Trọng Tuấn","Đội trưởng","Trung tâm HN3","Kỹ thuật, hạ tầng","4359","tuannt2@vienthongtin.com"],["Cao Văn Thắng","Đội trưởng","Trung tâm HN3","Kỹ thuật, hạ tầng","41022","thangcv@vienthongtin.com"],["Bùi Bá Huy","Đội trưởng","Trung tâm HN3","Kỹ thuật, hạ tầng","","huybb@vienthongtin.com"],["Vũ Khương Duy","Trưởng phòng Quản lý đối tác 2","Trung tâm HN3","Kỹ thuật, hạ tầng","4409","duyvk2@fpt.com"],["Nguyễn Đắc Đoàn","Đội trưởng","Trung tâm HN3","Kỹ thuật, hạ tầng","4468","doannd@vienthongtin.com"],["Khương Xuân Thăng","Đội trưởng","Trung tâm HN3","Kỹ thuật, hạ tầng","40030","thangkx@vienthongtin.com"],["Trần Việt Dũng","Đội trưởng","Trung tâm HN3","Kỹ thuật, hạ tầng","","dungtv6@vienthongtin.com"],["Lê Thị Thúy","Trưởng phòng DVKH 1","Trung tâm HN3","Dịch vụ khách hàng","4108","thuylt17@fpt.com"],["Nguyễn Thị Mai","Trưởng phòng DVKH 2","Trung tâm HN3","Dịch vụ khách hàng","4663","maint7@fpt.com"],["Lò Thị Thanh Quỳnh","Hành chính nhân sự · HN3.1, HN3.2","Trung tâm HN3","Hành chính, nhân sự, kế toán","4705","quynhltt@fpt.com"],["Lê Công Triệu","Giám đốc chi nhánh","Trung tâm HN4","Lãnh đạo","3400","trieulc@fpt.com"],["Hoàng Đăng Hưng","Trưởng phòng Quản lý đối tác 1","Trung tâm HN4","Kỹ thuật, hạ tầng","4702","hunghd@fpt.com"],["Hồ Sĩ Diễn","Phó phòng Quản lý đối tác 1","Trung tâm HN4","Kỹ thuật, hạ tầng","47226","dienhs@fpt.com"],["Lưu Đức Triều","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","4456","trieuld@vienthongtin.com"],["Lương Văn Huy","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","","huylv4@vienthongtin.com"],["Nguyễn Đức Nghĩa","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","4687","nghiand5@vienthongtin.com"],["Trần Thiện Quang","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","","quangtt5@vienthongtin.com"],["Mai Văn Tráng","Trưởng phòng Quản lý đối tác 2","Trung tâm HN4","Kỹ thuật, hạ tầng","4774","trangmv@fpt.com"],["Vũ Văn Cường","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","41101","cuongvv3@vienthongtin.com"],["Nguyễn Mạnh Hùng","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","","hungnm5@vienthongtin.com"],["Lê Ngọc Hải","Trưởng phòng Quản lý đối tác 3","Trung tâm HN4","Kỹ thuật, hạ tầng","3379","hailn12@fpt.com"],["Lê Văn Tùng","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","3299","tunglv@vienthongtin.com"],["Nguyễn Quang Diễn","Đội trưởng","Trung tâm HN4","Kỹ thuật, hạ tầng","3265","diennq@vienthongtin.com"],["Vũ Thị Hương","Trưởng phòng DVKH 1","Trung tâm HN4","Dịch vụ khách hàng","4782","huongvt2@fpt.com"],["Doãn Anh","Phó phòng DVKH 1","Trung tâm HN4","Dịch vụ khách hàng","4219","anhd@fpt.com"],["Bùi Thị Nga","Trưởng phòng DVKH 2","Trung tâm HN4","Dịch vụ khách hàng","4341","ngabt@fpt.com"],["Lê Thị Lý","Trưởng phòng DVKH 3","Trung tâm HN4","Dịch vụ khách hàng","4175, 4232, 42215","lylt@fpt.com"],["Nguyễn Thị Nguyên","Hành chính nhân sự · HN4.1, HN4.2","Trung tâm HN4","Hành chính, nhân sự, kế toán","4271","nguyennt@fpt.com"],["Nguyễn Thị Thanh Thủy","Hành chính nhân sự · HN4.3","Trung tâm HN4","Hành chính, nhân sự, kế toán","40035","thuyntt193@fpt.com"],["Lưu Thị Lê","Giám đốc chi nhánh","Trung tâm HN5","Lãnh đạo","4722","lelt2@fpt.com"],["Đỗ Thanh Tuân","Trưởng phòng Quản lý đối tác 1","Trung tâm HN5","Kỹ thuật, hạ tầng","4204","tuandt20@fpt.com"],["Chu Quang Tân","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","4719","tancq@vienthongtin.com"],["Nguyễn Văn Quang","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","4727","quangnv13@vienthongtin.com"],["Nguyễn Đình Cảnh","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","","canhnd@vienthongtin.com"],["Nguyễn Vân Nam","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","","namnv25@vienthongtin.com"],["Nguyễn Bá Vinh","Trưởng phòng Quản lý đối tác 2","Trung tâm HN5","Kỹ thuật, hạ tầng","4352","vinhnb2@fpt.com"],["Nguyễn Văn Tú","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","47230","tunv@vienthongtin.com"],["Phạm Đức Trung","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","40811","trungpd1@vienthongtin.com"],["Trương Hoàng Vương","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","","vuongth@vienthongtin.com"],["Nguyễn Đình Toàn","Trưởng phòng Quản lý đối tác 3","Trung tâm HN5","Kỹ thuật, hạ tầng","4457","toannd24@fpt.com"],["Phạm Văn Hoàng","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","4746","hoangpv2@vienthongtin.com"],["Nguyễn Duy Cường","Đội trưởng","Trung tâm HN5","Kỹ thuật, hạ tầng","4327","cuongnd@vienthongtin.com"],["Trương Thị Hoàn","Trưởng phòng DVKH 1,2 · Kiêm nhiệm từ 01/06/2025","Trung tâm HN5","Dịch vụ khách hàng","4373","hoantt14@fpt.com"],["Nguyễn Thị Thu Hằng","Phó phòng DVKH 2","Trung tâm HN5","Dịch vụ khách hàng","41313","hangntt22@fpt.com"],["Nguyễn Thị Hồng Nhung","Trưởng phòng DVKH 3","Trung tâm HN5","Dịch vụ khách hàng","4329","nhungnth10@fpt.com"],["Phạm Thanh Thủy","Hành chính nhân sự · HN5.1, HN5.3","Trung tâm HN5","Hành chính, nhân sự, kế toán","4212","thuypt54@fpt.com"],["Lê Thị Oanh","Hành chính nhân sự · HN5.2, HN5.3","Trung tâm HN5","Hành chính, nhân sự, kế toán","4381","oanhlt18@fpt.com"],["Nguyễn Văn Phong","Giám đốc chi nhánh","Trung tâm HN6","Lãnh đạo","3450-42026","phongnv2@fpt.com"],["Nguyễn Thành Công","Trưởng phòng Quản lý đối tác 1","Trung tâm HN6","Kỹ thuật, hạ tầng","4416","congnt21@fpt.com"],["Trần Hùng Mạnh","Đội trưởng","Trung tâm HN6","Kỹ thuật, hạ tầng","3792","manhth2@fpt.com"],["Nguyễn Hữu Uý","Đội trưởng","Trung tâm HN6","Kỹ thuật, hạ tầng","3286","uynh@vienthongtin.com"],["Đinh Đình Phẩm","Đội trưởng","Trung tâm HN6","Kỹ thuật, hạ tầng","4754","phamdd@vienthongtin.com"],["Trần Văn Năng","Trưởng phòng Quản lý đối tác 2","Trung tâm HN6","Kỹ thuật, hạ tầng","40305","nangtv3@fpt.com"],["Phùng Mạnh Thịnh","Đội trưởng","Trung tâm HN6","Kỹ thuật, hạ tầng","4247","thinhpm@vienthongtin.com"],["Hoàng Tiến Hà","Đội trưởng","Trung tâm HN6","Kỹ thuật, hạ tầng","","haht@vienthongtin.com"],["Lê Phương Lan","Trưởng phòng DVKH 1","Trung tâm HN6","Dịch vụ khách hàng","42025","lanlp@fpt.com"],["Nguyễn Thị Thu Trang","Trưởng phòng DVKH 2","Trung tâm HN6","Dịch vụ khách hàng","4240","trangntt16@fpt.com"],["Lê Minh Phương","Hành chính nhân sự · HN6.1","Trung tâm HN6","Hành chính, nhân sự, kế toán","3499","phuonglm13@fpt.com"],["Hà Thị Linh","Hành chính nhân sự · HN6.2","Trung tâm HN6","Hành chính, nhân sự, kế toán","","linhht39@fpt.com"],["Trần Hùng Thường","Giám đốc chi nhánh","Trung tâm HN7","Lãnh đạo","4120","thuongth@fpt.com"],["Nguyễn Hồng Quân","Phó Giám đốc chi nhánh","Trung tâm HN7","Lãnh đạo","4601","quannh2@fpt.com"],["Đinh Xuân Hiếu","Trưởng phòng Quản lý đối tác 1","Trung tâm HN7","Kỹ thuật, hạ tầng","4364","hieudx4@fpt.com"],["Nguyễn Thế Dần","Phó phòng Quản lý đối tác 1","Trung tâm HN7","Kỹ thuật, hạ tầng","4357","dannt9@fpt.com"],["Nguyễn Trung Kiên","Đội trưởng","Trung tâm HN7","Kỹ thuật, hạ tầng","40720","kiennt3@vienthongtin.com"],["Nguyễn Quyết Cường","Đội trưởng","Trung tâm HN7","Kỹ thuật, hạ tầng","4475","cuongnq5@vienthongtin.com"],["Đặng Quyết Tiến","Đội trưởng","Trung tâm HN7","Kỹ thuật, hạ tầng","4724","tiendq@vienthongtin.com"],["Vũ Văn Tú","Đội trưởng","Trung tâm HN7","Kỹ thuật, hạ tầng","","tuvv3@vienthongtin.com"],["Nguyễn Văn Cường","Trưởng phòng Quản lý đối tác 2","Trung tâm HN7","Kỹ thuật, hạ tầng","3531","cuongnv46@fpt.com"],["Hoàng Văn Luật","Phó phòng Quản lý đối tác 2","Trung tâm HN7","Kỹ thuật, hạ tầng","4658","luathv@fpt.com"],["Vũ Đức Phương","Đội trưởng","Trung tâm HN7","Kỹ thuật, hạ tầng","","phuongvd8@vienthongtin.com"],["Nguyễn Văn Hải","Đội trưởng","Trung tâm HN7","Kỹ thuật, hạ tầng","","hainv21@vienthongtin.com"],["Tạ Đình Tuấn","Đội trưởng","Trung tâm HN7","Kỹ thuật, hạ tầng","","tuantd2@vienthongtin.com"],["Nguyễn Thị Bích Ngọc","Trưởng phòng DVKH 1","Trung tâm HN7","Dịch vụ khách hàng","4202","ngocntb12@fpt.com"],["Nguyễn Thị Thu Phương","Phó phòng DVKH 1","Trung tâm HN7","Dịch vụ khách hàng","4441","phuongntt5@fpt.com"],["Nghiêm Thu Hương","Trưởng phòng DVKH 2","Trung tâm HN7","Dịch vụ khách hàng","4333","huongnt45@fpt.com"],["Lê Thị Liên","Phó phòng DVKH 2","Trung tâm HN7","Dịch vụ khách hàng","4612","lienlt3@fpt.com"],["Nguyễn Thị Ngọc Quỳnh","Hành chính nhân sự · HN7.1","Trung tâm HN7","Hành chính, nhân sự, kế toán","4916","quynhntn31@fpt.com"],["Tạ Thu Hồng","Hành chính nhân sự · HN7.2","Trung tâm HN7","Hành chính, nhân sự, kế toán","4616","hongtt6@fpt.com"],["Ngô Thanh Tuyến","Giám đốc chi nhánh","Trung tâm HN9","Lãnh đạo","4200","tuyennt8@fpt.com"],["Hoàng Lan Hương","Phó Giám đốc chi nhánh","Trung tâm HN9","Lãnh đạo","4302","huonghl2@fpt.com"],["Trần Văn Bình","Trưởng phòng Quản lý đối tác 1","Trung tâm HN9","Kỹ thuật, hạ tầng","4464/4386","binhtv10@fpt.com"],["Trần Công Tài","Đội trưởng","Trung tâm HN9","Kỹ thuật, hạ tầng","4653","taitc3@fpt.com"],["Phạm Văn Huy","Đội trưởng","Trung tâm HN9","Kỹ thuật, hạ tầng","4386","huypv@vienthongtin.com"],["Phùng Thanh Hải","Đội trưởng","Trung tâm HN9","Kỹ thuật, hạ tầng","","haipt2@vienthongtin.com"],["Thái Ngọc Quý","Trưởng phòng Quản lý đối tác 2","Trung tâm HN9","Kỹ thuật, hạ tầng","4227","quytn9@fpt.com"],["Trần Văn Quang","Đội trưởng","Trung tâm HN9","Kỹ thuật, hạ tầng","4766","quangtv@vienthongtin.com"],["Vũ Thị Thơm","Trưởng phòng DVKH 1,2","Trung tâm HN9","Dịch vụ khách hàng","4383","thomvt2@fpt.com"],["Trần Hồng Vân","Phó phòng DVKH 2","Trung tâm HN9","Dịch vụ khách hàng","40802","vanth2@fpt.com"],["Nguyễn Thị Thùy Linh","Hành chính nhân sự · HN9.1, HN9.2","Trung tâm HN9","Hành chính, nhân sự, kế toán","3486","linhntt155@fpt.com"]];
 function renderDirectory(b,cur){
   b.textContent='';
@@ -1928,16 +2185,18 @@ function renderLinks(cur){
 }
 function route(){
   const cur = ROUTES.find(r=>'#'+r.h===location.hash) || ROUTES.find(r=>r.h===DEF_ROUTE);
+  try{ if(ACL.ready && !ACL.allowRoute(cur.h)){ location.hash='#'+DEF_ROUTE; return; } }catch(e){}
   const fk = cur.fk||cur.h; CUR_TAB = cur.tab||null;
   ROUTES.forEach(r=>{ const a=$('#nt-'+r.h); if(a) a.classList.toggle('on', r===cur); });
   document.body.classList.toggle('framed', !!cur.src);
   $('#pageR').hidden = cur.page!=='R'; $('#pageS').hidden = cur.page!=='S'; $('#pageL').hidden = cur.page!=='L'; if(cur.page==='L') renderLinks(cur);
+  $('#pageA').hidden = cur.page!=='A'; if(cur.page==='A') ACL.renderPage(cur);
   Object.entries(FRAMES).forEach(([h,f])=>f.hidden = h!==fk);
   if(cur.src && !FRAMES[fk]){ let src=cur.src; if(EMBED && EMBED[fk]){ const s=atob(EMBED[fk]), a=new Uint8Array(s.length); for(let i=0;i<s.length;i++) a[i]=s.charCodeAt(i); src=URL.createObjectURL(new Blob([new TextDecoder('utf-8').decode(a).replace(/<html/i,'<html data-theme="'+(document.documentElement.dataset.theme||'light')+'"')],{type:'text/html;charset=utf-8'})); }
     const f=el('iframe',{src,title:cur.l}); f.addEventListener('load',()=>{ postTheme(f); postPref(f); postRoster(f); postKpiTab(f); }); $('#frames').append(f); FRAMES[fk]=f; }
   else if(cur.tab && FRAMES[fk]) postKpiTab(FRAMES[fk]);
   const a=$('#nt-'+cur.h); if(a && a.scrollIntoView) a.scrollIntoView({block:'nearest',inline:'nearest'});
-  const h1=$('#pageTitle'); if(h1){ h1.dataset.i18n = cur.page==='S' ? 'staffPageTitle' : cur.page==='L' ? cur.k : 'appTitle'; h1.textContent = L(h1.dataset.i18n); }
+  const h1=$('#pageTitle'); if(h1){ h1.dataset.i18n = cur.page==='S' ? 'staffPageTitle' : (cur.page==='L'||cur.page==='A') ? cur.k : 'appTitle'; h1.textContent = L(h1.dataset.i18n); }
   if(cur.page==='S') renderRoster(true);
 }
 (function(){ const w=el('div',{class:'scrl'});
@@ -2012,9 +2271,9 @@ addEventListener('message', async ev=>{
 // roster storage: shared db if available, else this browser
 (async()=>{
   let db=null; try{ db = await claude.use('db'); }catch(e){}
-  try{ const u = await claude.use('user'); if(u && u.can){ const w = await u.can('data.write'); if(w===false) CAN_WRITE=false; } }catch(e){}
+  try{ const u = await claude.use('user'); if(u && u.can){ const w = await u.can('data.write'); if(w===false){ CAN_BASE=false; } CAN_SHIFT=CAN_BASE; CAN_WRITE=CAN_BASE&&IS_ADMIN; } }catch(e){}
   if(!db){ await loadLocalIDB(); const sv=store.get('roster', null); ROSTER = (sv && sv.staff && sv.staff.length) ? sv : (DEFAULT_ROSTER ? JSON.parse(JSON.stringify(DEFAULT_ROSTER)) : {leaders:[],staff:[]}); DRAFT=clone(ROSTER); initFiles(null); return; }
-  await loadLocalIDB(); DB=db; let first=true; initFiles(db); initShifts(db);
+  await loadLocalIDB(); DB=db; ACL.initShared(); let first=true; initFiles(db); initShifts(db);
   db.doc('app/contact').onSnapshot(s=>{ if(s.exists){ const v=s.data(); CONTACT=Object.assign({},CONTACT_DEF,{name:v.name,role:v.role,unit:v.unit,phone:v.phone,email:v.email,zalo:v.zalo,note:v.note}); store.set('contact',CONTACT); if(!$('#contactModal').hidden && !CT_EDIT) renderContact(); } },()=>{});
   const timer=setTimeout(()=>{ $('#rosterHint').textContent='Chưa tải được danh sách nhân sự — có thể do mạng, đang thử lại…'; },10000);
   db.doc('team/roster').onSnapshot(snap=>{
