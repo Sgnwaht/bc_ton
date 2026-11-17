@@ -562,6 +562,28 @@ html.sb-mini .ngrp.gtog::after{display:none}
 .cb-n{font-size:11.5px;color:var(--muted);padding:6px 12px;border-bottom:1px solid var(--line)}
 .cb-f{flex:1;width:100%;border:0;background:#fff;min-height:0}
 @media (max-width:600px){.cbl button span{display:none}.cbl button{padding:0 13px}.cbw{right:12px;left:12px;width:auto;bottom:80px}}
+
+/* màn hình nhỏ (laptop 1366x768 hay phóng to 125-150%): thu gọn phần cố định để không che nội dung */
+@media (max-width:1280px),(max-height:760px){
+  :root{--sbw:208px}
+  .nav{padding:10px 10px 8px!important;gap:3px!important}
+  .nav .brand{padding:0 4px 8px!important;margin-bottom:4px!important}
+  .ntab{padding:6px 10px!important;font-size:13px!important}
+  .ngrp{padding:7px 10px 2px!important;font-size:10.5px!important}
+  .sbfoot{gap:5px!important;padding-top:6px!important}
+  .sbb{padding:6px 10px!important;font-size:12.5px!important}
+  .acct{padding:5px 6px!important}
+  body{padding-bottom:64px}
+  .scrl{gap:5px;right:10px;bottom:12px}
+  .scrl button{width:34px;height:34px}
+  .scrl svg{width:17px;height:17px}
+  .cbl{right:54px;bottom:12px;gap:6px}
+  .cbl button{height:36px;padding:0 10px 0 9px;font-size:12px;border-radius:18px;gap:5px}
+  .cbl svg{width:18px;height:18px}
+  .cbw{right:54px;bottom:56px;height:min(520px,calc(100vh - 80px))}
+}
+@media (max-width:1100px){.cbl button span{display:none}.cbl button{padding:0 10px}}
+html.sb-mini{--sbw:68px}
 </style>
 </head>
 <body>
@@ -998,7 +1020,7 @@ function applyPref(){
   if(PREF.bg && themeNow()!=='dark') r.style.setProperty('--paper',PREF.bg); else r.style.removeProperty('--paper');
   document.body.style.zoom = PREF.zoom!==1 ? PREF.zoom : '';
   r.style.setProperty('--cellpad', {c:'3px',m:'4.5px',l:'7px'}[PREF.dens]||'4.5px');
-  r.classList.toggle('sb-mini', PREF.sb==='mini' || (innerWidth>640 && innerWidth<=900));
+  r.classList.toggle('sb-mini', PREF.sb==='mini' || (innerWidth>640 && innerWidth<=1100));
   const tg=$('#sbToggle'); if(tg){ {const tl=tg.querySelector('.lb'); if(tl) tl.textContent=L('collapse');} tg.classList.toggle('mini',PREF.sb==='mini'); tg.title=PREF.sb==='mini'?L('expand'):L('collapse'); }
   r.lang=PREF.lang;
   document.querySelectorAll('[data-i18n]').forEach(e=>{ e.textContent=L(e.dataset.i18n); });
@@ -1006,7 +1028,7 @@ function applyPref(){
   document.querySelectorAll('.sbb').forEach(b=>{ const lb=b.querySelector('.lb'); if(lb) b.title=lb.textContent; });
   try{ Object.values(FRAMES||{}).forEach(f=>{ postTheme(f); postPref(f); }); }catch(e){}
 }
-addEventListener('resize',()=>{ const r=document.documentElement; r.classList.toggle('sb-mini', PREF.sb==='mini' || (innerWidth>640 && innerWidth<=900)); });
+addEventListener('resize',()=>{ const r=document.documentElement; r.classList.toggle('sb-mini', PREF.sb==='mini' || (innerWidth>640 && innerWidth<=1100)); });
 function setPref(k,v){ PREF[k]=v; store.set('pref',PREF); applyPref(); if(R) render(); renderSettings(); }
 if(window.matchMedia) matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{ if(PREF.theme==='auto'){ applyPref(); if(R) render(); } });
 $('#themeBtn').onclick = () => setPref('theme', themeNow()==='dark'?'light':'dark');
